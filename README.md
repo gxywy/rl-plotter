@@ -1,4 +1,4 @@
-# RL-Ploter
+# RL-Plotter
 
  This is a simple tool which can plot learning curves easily for reinforcement learning.
 
