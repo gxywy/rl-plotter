@@ -5,7 +5,18 @@
 ## Requirements
 
 - python >=3.4 
+
 - gym >= 0.10
+
 - tensorboardX
+
 - matplotlib
+
 - numpy
+
+## To Do
+
+- [ ] reinforcement learning plot tools
+- [ ] history experiment data plot tools
+- [ ] basic data plot tools（including ML-Loss plot）
+- [ ] dynamic plot tools

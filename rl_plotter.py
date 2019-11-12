@@ -3,19 +3,14 @@
 
 __author__ = 'MICROYU'
 
+import os
 import random
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorboardX import SummaryWriter
 
-colors = ['b', 'g', 'r', 'c', 'k', 'y', 'm']
-
-class RL_Dataset():
-    def __init__(self, rewards, losses):
-        pass
-
-class RL_Ploter():
-    def __init__(self, exp_name, use_tensorboard=True):
+class RL_Plotter():
+    def __init__(self, exp_name, use_tensorboard=False):
         self.use_tensorboard = use_tensorboard
         self.exp_name = exp_name
         self.step_counter = 0
@@ -27,13 +22,14 @@ class RL_Ploter():
             self.tf_board_writer = SummaryWriter()
             print("[Info] tensorboardX is enable, please open tensorboard server in current path.")
 
-    def append_rewards(self, reward):
+    def append_rewards(self, reward, log=True):
         self.episode_counter += 1
         self.rewards.append(reward)
         if self.use_tensorboard:
             self.tf_board_writer.add_scalar('Train/reward', reward, self.episode_counter)
+        #print("[info] episode:" )
 
-    def append_losses(self, loss):
+    def append_losses(self, loss, log=True):
         self.step_counter += 1
         self.losses.append(loss)
         if self.use_tensorboard:
@@ -47,11 +43,11 @@ class RL_Ploter():
     def load_history(self):
         pass
 
-    def save_result(self):
+    def _save_result(self):
         plt.savefig('haha.png', dpi=400, bbox_inches='tight')
         pass
     
-    def smooth_curve(self, points, factor=0.9):
+    def _smooth_curve(self, points, factor):
         smoothed_points = []
         for point in points:
             if smoothed_points:
@@ -61,61 +57,52 @@ class RL_Ploter():
                 smoothed_points.append(point)
         return smoothed_points
 
-    def plot_result_multi(self):
-        reward_mean = np.mean(self.rewards)
-        reward_std = np.std(self.rewards)
-
-        plt.xkcd()
-        
+    def plot_result_multi(self, reward_smooth=0.9, loss_smooth=0.9, grid=False, show=True):
+        plt.tight_layout()
         fig = plt.figure(figsize=(12,5))
+
         ax1 = fig.add_subplot(1,2,1)
-        ax1.set_xlabel('Episode')
-        ax1.set_ylabel('Episode Reward')
-        ax1.set_title('Episode Reward over Time')
-        
-        ax1.plot(self.smooth_curve(self.rewards), label=self.exp_name)
-        ax1.fill_between(np.arange(self.episode_counter), self.rewards - reward_std, self.rewards + reward_std, alpha=0.1)
-        #ax1.plot(self.rewards, 'g', linewidth=3, alpha=0.1)
-        ax1.legend(loc='upper left')
+        ax1.set(title='Episode Reward over Time', xlabel='Episode', ylabel='Episode Reward')
+        if grid:
+            ax1.grid()
+        ax1.plot(self._smooth_curve(self.rewards, reward_smooth), color='#1f77b4', label=self.exp_name)
+        ax1.plot(self.rewards, color='#1f77b4', alpha=0.3)
+        ax1.legend(loc='lower right')
 
         ax2 = fig.add_subplot(1,2,2)
-        ax2.set_xlabel('Step')
-        ax2.set_ylabel('Running Variance')
-        ax2.set_title('Running Variance over Time')
-        ax2.plot(self.losses, label=self.exp_name)
-        ax2.legend(loc='upper left')
-
-        #plt.legend(handles=[l1, l2], labels=['up', 'down'],  loc='best')
-        #plt.set_autoscale_on(True)
-        #plt.autoscale_view(True,True,True)
+        ax2.set(title='Running Variance over Time', xlabel='Timestep', ylabel='Running Variance')
+        if grid:
+            ax2.grid()
+        ax2.plot(self.losses, color="#1f77b4", label=self.exp_name)
+        ax2.plot(self._smooth_curve(self.losses, loss_smooth), color='#1f77b4', label=self.exp_name)
+        ax2.legend(loc='lower right')
         
-        plt.tight_layout()
-        plt.show()
+        self._save_result()
+        if show:
+            plt.show()
     
-    def plot_result_single(self, is_smoothing=True, reward_figure=True, loss_figure=True):
-        pass
+    def plot_reward(self, smooth=0.9, grid=False, show=True):
+        fig, ax = plt.subplots()
+        ax.set(title='Episode Reward over Time', xlabel='Episode', ylabel='Episode Reward')
+        if grid:
+            ax.grid()
+        ax.plot(self._smooth_curve(self.rewards, smooth), color='#1f77b4', label=self.exp_name)
+        ax.plot(self.rewards, color='#1f77b4', alpha=0.3)
+        ax.legend(loc='lower right')
 
-
-class Simple_Ploter():
-    def __init__(self, x_data, y_data):
-        pass
-
-
-class Dynamic_Plotor():
-    def __init__(self, x_data, y_data):
-        pass
-
-    def plot(self, x, y):
-        plt.ion() # interactive mode on 
-        line, = plt.plot(x,y) # plot the data and specify the 2d line
-        ax = plt.gca() # get most of the figure elements 
-
-        while True:
-            x = np.append(x, new_x)
-            y = np.append(y, new_y)
-            line.set_xdata(x)
-            line.set_ydata(y) # set the curve with new data
-            ax.relim() # renew the data limits
-            ax.autoscale_view(True, True, True) # rescale plot view
-            plt.draw() # plot new figure
-            plt.pause(1e-17) # pause to show the figure
+        self._save_result()
+        if show:
+            plt.show()
+    
+    def plot_loss(self, smooth=0.9, grid=False, show=True):
+        fig, ax = plt.subplots()
+        ax.set(title='Running Variance over Time', xlabel='Timestep', ylabel='Running Variance')
+        if grid:
+            ax.grid()
+        ax.plot(self.losses, color="#1f77b4", label=self.exp_name)
+        ax.plot(self._smooth_curve(self.losses, smooth), color='#1f77b4', label=self.exp_name)
+        ax.legend(loc='lower right')
+        
+        self._save_result()
+        if show:
+            plt.show()
