@@ -5,6 +5,8 @@ __author__ = 'MICROYU'
 
 import os
 import random
+import time
+import logging
 import matplotlib.pyplot as plt
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -13,23 +15,27 @@ class RL_Plotter():
     def __init__(self, exp_name, use_tensorboard=False):
         self.use_tensorboard = use_tensorboard
         self.exp_name = exp_name
+        self.save_dir = './result/' + exp_name + "/" + str(time.strftime('%b%d_%H-%M-%S')) + "/"
+        if not os.path.exists(self.save_dir):
+            os.makedirs(self.save_dir)
         self.step_counter = 0
         self.episode_counter = 0
         self.rewards = []
         self.losses = []
-        self.history_dataset = []
+        logging.basicConfig(filename=self.save_dir + exp_name + ".log", level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
         if use_tensorboard:
             self.tf_board_writer = SummaryWriter()
-            print("[Info] tensorboardX is enable, please open tensorboard server in current path.")
+            logging.warn("tensorboardX is enable, please open tensorboard server in current path")
 
-    def add_rewards(self, reward, log=True):
+    def add_rewards(self, reward):
         self.episode_counter += 1
         self.rewards.append(reward)
         if self.use_tensorboard:
             self.tf_board_writer.add_scalar('Train/reward', reward, self.episode_counter)
-        #print("[info] episode:" )
+        if self.episode_counter % 100 == 0:
+            logging.info("[Info] episodes: %d, mean reward: %d, steps: %d" % (self.episode_counter, np.mean(self.rewards), self.step_counter))
 
-    def add_losses(self, loss, log=True):
+    def add_losses(self, loss):
         self.step_counter += 1
         self.losses.append(loss)
         if self.use_tensorboard:
@@ -41,22 +47,21 @@ class RL_Plotter():
         self.rewards = self.losses = []
 
     def _save_result(self, fig):
-        save_dir = './result/'
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-        fig.savefig(save_dir + self.exp_name, dpi=400, bbox_inches='tight')
+        fig.savefig(self.save_dir + self.exp_name, dpi=400, bbox_inches='tight')
 
-        csv_file = open(save_dir + self.exp_name + '_reward.csv', 'w')
+        csv_file = open(self.save_dir + self.exp_name + '_reward.csv', 'w')
         for index in range(self.episode_counter):
             csv_file.write(str(index)+','+str(self.rewards[index])+'\n')
             csv_file.flush()
         csv_file.close()
 
-        csv_file = open(save_dir + self.exp_name + '_loss.csv', 'w')
+        csv_file = open(self.save_dir + self.exp_name + '_loss.csv', 'w')
         for index in range(self.step_counter):
             csv_file.write(str(index)+','+str(self.losses[index])+'\n')
             csv_file.flush()
         csv_file.close()
+
+        self.tf_board_writer.close()
     
     def _smooth_curve(self, points, factor):
         smoothed_points = []
