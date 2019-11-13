@@ -16,7 +16,7 @@
 
 ## To Do
 
-- [ ] reinforcement learning plot tools
+- [x] reinforcement learning plot tools
 - [ ] history experiment data plot tools
-- [ ] basic data plot tools（including ML-Loss plot）
-- [ ] dynamic plot tools
+- [ ] ~~basic data plot tools（including ML-Loss plot）~~
+- [ ] ~~dynamic plot tools~~
