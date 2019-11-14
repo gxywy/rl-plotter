@@ -51,7 +51,7 @@ class History_Plotter():
                 exp_info['loss_std'] = np.array(loss_all).T.std(axis=1)
                 self.exps.append(exp_info)
 
-    def plot(self, grid=False, show=True, title=None):
+    def plot(self, grid=False, show=True):
         fig = plt.figure(figsize=(12,5))
 
         ax1 = fig.add_subplot(1,2,1)
@@ -83,3 +83,6 @@ class History_Plotter():
     def _save_result(self, fig):
         logging.info("saving data in " + self.path + '...')
         fig.savefig(self.path + 'figure', dpi=400, bbox_inches='tight')
+
+his = History_Plotter()
+his.plot()
