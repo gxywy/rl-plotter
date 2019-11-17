@@ -5,8 +5,18 @@ import os
 import numpy as np
 import pandas
 from collections import defaultdict, namedtuple
-from baselines.bench import monitor
-from baselines.logger import read_json, read_csv
+import baseline_monitor
+
+## read_json read_csv from baseline.logger
+def read_json(fname):
+    ds = []
+    with open(fname, 'rt') as fh:
+        for line in fh:
+            ds.append(json.loads(line))
+    return pandas.DataFrame(ds)
+
+def read_csv(fname):
+    return pandas.read_csv(fname, index_col=None, comment='#')
 
 def smooth(y, radius, mode='two_sided', valid_only=False):
     '''

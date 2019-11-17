@@ -14,8 +14,10 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
 
 colors = ['b', 'g', 'r', 'c', 'k', 'y', 'm']
+#logging.info("saving data in " + self.save_dir + '...')
+#fig.savefig(self.save_dir + 'figure', dpi=400, bbox_inches='tight')
 
-class History_Plotter():
+class Plotter():
     def __init__(self):
         self.exps = []
         self.path = "./result/"
@@ -47,8 +49,8 @@ class History_Plotter():
                     loss_all.append(item['loss'])
                 exp_info['reward_mean'] = np.array(reward_all).T.mean(axis=1)
                 exp_info['reward_std'] = np.array(reward_all).T.std(axis=1)
-                exp_info['loss_mean'] = np.array(loss_all).T.mean(axis=1)
-                exp_info['loss_std'] = np.array(loss_all).T.std(axis=1)
+                #exp_info['loss_mean'] = np.array(loss_all).T.mean(axis=1)
+                #exp_info['loss_std'] = np.array(loss_all).T.std(axis=1)
                 self.exps.append(exp_info)
 
     def plot(self, grid=False, show=True):
@@ -59,10 +61,10 @@ class History_Plotter():
         if grid:
             ax1.grid()
         for index in range(len(self.exps)):
-            mean = exps[index]['reward_mean']
-            std = exps[index]['reward_std']
-            ax1.fill_between(exps[index]['raw_data'][0]['reward_x'], mean - std, mean + std, color=colors[index], alpha=0.3)
-            ax1.plot(mean, color=colors[index], label=self.exp_name)
+            mean = self.exps[index]['reward_mean']
+            std = self.exps[index]['reward_std']
+            ax1.fill_between(self.exps[index]['raw_data'][0]['reward_x'], self._smooth_curve(mean - std), self._smooth_curve(mean + std), color=colors[index], alpha=0.3)
+            ax1.plot(self._smooth_curve(mean), color=colors[index], label=self.exps[index]['exp_name'])
         ax1.legend(loc='lower right')
 
         ax2 = fig.add_subplot(1,2,2)
@@ -70,10 +72,10 @@ class History_Plotter():
         if grid:
             ax2.grid()
         for index in range(len(self.exps)):
-            mean = exps[index]['loss_mean']
-            std = exps[index]['loss_std']
-            ax2.fill_between(exps[index]['raw_data'][0]['loss_x'], mean - std, mean + std, color=colors[index], alpha=0.3)
-            ax2.plot(mean, color=colors[index], label=self.exp_name)
+            mean = self.exps[index]['loss_mean']
+            std = self.exps[index]['loss_std']
+            #ax2.fill_between(self.exps[index]['raw_data'][0]['loss_x'], mean - std, mean + std, color=colors[index], alpha=0.3)
+            #ax2.plot(mean, color=colors[index], label=self.exps[index]['exp_name'])
         ax2.legend(loc='lower right')
         
         self._save_result(fig)
@@ -83,6 +85,16 @@ class History_Plotter():
     def _save_result(self, fig):
         logging.info("saving data in " + self.path + '...')
         fig.savefig(self.path + 'figure', dpi=400, bbox_inches='tight')
+
+    def _smooth_curve(self, points, factor=0.9):
+        smoothed_points = []
+        for point in points:
+            if smoothed_points:
+                previous = smoothed_points[-1]
+                smoothed_points.append(previous * factor + point * (1 - factor))
+            else:
+                smoothed_points.append(point)
+        return smoothed_points
 
 his = History_Plotter()
 his.plot()
