@@ -3,7 +3,9 @@
 
 __author__ = 'MICROYU'
 
+import csv
 import os
+import json
 import random
 import time
 import logging
@@ -11,12 +13,16 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Logger():
-    def __init__(self, exp_name, use_tensorboard=False):
+    def __init__(self, exp_name, env_name=None, use_tensorboard=False):
         self.save_dir = "./logs/" + exp_name + "/"
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
         self.csv_file = open(self.save_dir + 'monitor.csv', 'w')
-        self.csv_file.write('r,l,t\n')
+        header={"t_start": time.time(), 'env_id' : env_name}
+        header = '# {} \n'.format(json.dumps(header))
+        self.csv_file.write(header)
+        self.logger = csv.DictWriter(self.csv_file, fieldnames=('r', 'l', 't'))
+        self.logger.writeheader()
         self.csv_file.flush()
 
         self.step_counter = 0
@@ -27,6 +33,7 @@ class Logger():
 
         self.use_tensorboard = use_tensorboard
         self.is_learning_start = False
+        self.start_time = time.time()
         
         logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
 
@@ -54,7 +61,8 @@ class Logger():
             logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
                 (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq:])))
         
-        self.csv_file.write(str(reward) +','+ str(self.steps[-1])+'\n')
+        epinfo = {"r": reward, "l": self.steps[-1], "t": time.time() - self.start_time}
+        self.logger.writerow(epinfo)
         self.csv_file.flush()
 
     def add_loss(self, loss):
@@ -78,6 +86,5 @@ class Logger():
         self.losses = []
 
     def finish(self):
-        self.reward_csv.close()
-        self.loss_csv.close()
+        self.csv_file.close()
         self.tf_board_writer.close()
