@@ -4,15 +4,7 @@
 
 ## Requirements
 
-- python >=3.4 
-
-- gym >= 0.10
-
-- tensorboardX
-
-- matplotlib
-
-- numpy
+see requirements.txt
 
 ## To Do
 
