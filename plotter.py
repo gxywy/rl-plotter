@@ -3,98 +3,26 @@
 
 __author__ = 'MICROYU'
 
-import os
-import csv
-import random
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import time
-import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
+import plot_util as pu
+import warnings
+warnings.filterwarnings('ignore')
 
-colors = ['b', 'g', 'r', 'c', 'k', 'y', 'm']
-#logging.info("saving data in " + self.save_dir + '...')
-#fig.savefig(self.save_dir + 'figure', dpi=400, bbox_inches='tight')
+def plot(log_dir='./logs/', average_group=True, split_fn=lambda _: '', shaded_std=True, show=True):
+    results = pu.load_results(log_dir)
+    pu.plot_results(results, average_group=average_group, split_fn=split_fn, shaded_std=shaded_std)
+    plt.savefig(log_dir + 'figure', dpi=400, bbox_inches='tight')
+    if show:
+        plt.show()
 
-class Plotter():
-    def __init__(self):
-        self.exps = []
-        self.path = "./result/"
+def plot_single(log_dir, smooth_radius=0, show=True):
+    results = pu.load_results(log_dir)
+    r = results[0]
+    plt.plot(np.cumsum(r.monitor.l), pu.smooth(r.monitor.r, radius=0))
+    plt.savefig(log_dir + 'figure', dpi=400, bbox_inches='tight')
+    if show:
+        plt.show()
 
-        logging.info("reading data in " + self.path + '...')
-        exps_folder = os.listdir(self.path)
-        ## 读取每个实验的数据
-        for exp_folder in exps_folder:
-            if os.path.isdir(self.path + exp_folder):
-                exp_info = {'exp_name':exp_folder, 'reward_mean': [], 'reward_std': [], 'loss_mean': [], 'loss_std': [], 'raw_data': []}
-                path = "./result/" + exp_folder + "/"
-                times_folder = os.listdir(path)
-                ## 读取每次实验的数据
-                for time_folder in times_folder:
-                    if os.path.isdir(path + time_folder):
-                        result = {"reward_x":[], 'reward':[], 'loss_x':[], 'loss':[]}
-                        data = pd.read_csv(path + time_folder + '/reward.csv', names=["reward_x", "reward"])
-                        result['reward_x'] = data.reward_x.tolist()
-                        result['reward'] = data.reward.tolist()
-                        data = pd.read_csv(path + time_folder + '/loss.csv', names=["loss_x", "loss"])
-                        result['loss_x'] = data.loss_x.tolist()
-                        result['loss'] = data.loss.tolist()
-                        exp_info['raw_data'].append(result)
-                ## 根据raw_data计算平均值与方差
-                reward_all = []
-                loss_all = []
-                for item in exp_info['raw_data']:
-                    reward_all.append(item['reward'])
-                    loss_all.append(item['loss'])
-                exp_info['reward_mean'] = np.array(reward_all).T.mean(axis=1)
-                exp_info['reward_std'] = np.array(reward_all).T.std(axis=1)
-                #exp_info['loss_mean'] = np.array(loss_all).T.mean(axis=1)
-                #exp_info['loss_std'] = np.array(loss_all).T.std(axis=1)
-                self.exps.append(exp_info)
-
-    def plot(self, grid=False, show=True):
-        fig = plt.figure(figsize=(12,5))
-
-        ax1 = fig.add_subplot(1,2,1)
-        ax1.set(title='Episode Score over Time', xlabel='Episode', ylabel='Episode Score')
-        if grid:
-            ax1.grid()
-        for index in range(len(self.exps)):
-            mean = self.exps[index]['reward_mean']
-            std = self.exps[index]['reward_std']
-            ax1.fill_between(self.exps[index]['raw_data'][0]['reward_x'], self._smooth_curve(mean - std), self._smooth_curve(mean + std), color=colors[index], alpha=0.3)
-            ax1.plot(self._smooth_curve(mean), color=colors[index], label=self.exps[index]['exp_name'])
-        ax1.legend(loc='lower right')
-
-        ax2 = fig.add_subplot(1,2,2)
-        ax2.set(title='Running Variance over Time', xlabel='Step', ylabel='Running Variance')
-        if grid:
-            ax2.grid()
-        for index in range(len(self.exps)):
-            mean = self.exps[index]['loss_mean']
-            std = self.exps[index]['loss_std']
-            #ax2.fill_between(self.exps[index]['raw_data'][0]['loss_x'], mean - std, mean + std, color=colors[index], alpha=0.3)
-            #ax2.plot(mean, color=colors[index], label=self.exps[index]['exp_name'])
-        ax2.legend(loc='lower right')
-        
-        self._save_result(fig)
-        if show:
-            plt.show()
-
-    def _save_result(self, fig):
-        logging.info("saving data in " + self.path + '...')
-        fig.savefig(self.path + 'figure', dpi=400, bbox_inches='tight')
-
-    def _smooth_curve(self, points, factor=0.9):
-        smoothed_points = []
-        for point in points:
-            if smoothed_points:
-                previous = smoothed_points[-1]
-                smoothed_points.append(previous * factor + point * (1 - factor))
-            else:
-                smoothed_points.append(point)
-        return smoothed_points
-
-his = History_Plotter()
-his.plot()
+if __name__ == "__main__":
+    plot()

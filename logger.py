@@ -12,7 +12,7 @@ import numpy as np
 
 class Logger():
     def __init__(self, exp_name, use_tensorboard=False):
-        self.save_dir = "./logs/" + exp_name
+        self.save_dir = "./logs/" + exp_name + "/"
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
         self.csv_file = open(self.save_dir + 'monitor.csv', 'w')
@@ -52,9 +52,9 @@ class Logger():
         
         if self.episode_counter % freq == 0:
             logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
-                (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq])))
+                (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq:])))
         
-        self.csv_file.write(str(self.steps[-1]) +','+ str(reward)+'\n')
+        self.csv_file.write(str(reward) +','+ str(self.steps[-1])+'\n')
         self.csv_file.flush()
 
     def add_loss(self, loss):
@@ -68,8 +68,8 @@ class Logger():
             logging.warn("start learning, loss data received.")
             self.is_learning_start = True
 
-        self.csv_file.write(str(total_step) +','+ str(loss)+'\n')
-        self.csv_file.flush()
+        #self.csv_file.write(str(total_step) +','+ str(loss)+'\n')
+        #self.csv_file.flush()
 
     def reset(self):
         self.episode_counter = 0

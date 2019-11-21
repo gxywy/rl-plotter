@@ -5,7 +5,40 @@ import os
 import numpy as np
 import pandas
 from collections import defaultdict, namedtuple
-import baseline_monitor
+import csv
+from glob import glob
+## LoadMonitorResultsError load_results from baseline.bench.monitor
+class LoadMonitorResultsError(Exception):
+    pass
+
+def load_csv_results(dir):
+    import pandas
+    monitor_files = (
+        glob(osp.join(dir, "*monitor.csv"))) # get both csv
+    if not monitor_files:
+        raise LoadMonitorResultsError("no monitor files of the form found in " + dir)
+    dfs = []
+    headers = []
+    for fname in monitor_files:
+        with open(fname, 'rt') as fh:
+            if fname.endswith('csv'):
+                firstline = fh.readline()
+                if not firstline:
+                    continue
+                assert firstline[0] == '#'
+                header = json.loads(firstline[1:])
+                df = pandas.read_csv(fh, index_col=None)
+                headers.append(header)
+            else:
+                assert 0, 'unreachable'
+            df['t'] += header['t_start']
+        dfs.append(df)
+    df = pandas.concat(dfs)
+    df.sort_values('t', inplace=True)
+    df.reset_index(inplace=True)
+    df['t'] -= min(header['t_start'] for header in headers)
+    df.headers = headers # HACK to preserve backwards compatibility
+    return df
 
 ## read_json read_csv from baseline.logger
 def read_json(fname):
@@ -215,8 +248,8 @@ def load_results(root_dir_or_dirs, enable_progress=True, enable_monitor=True, ve
 
                 if enable_monitor:
                     try:
-                        result['monitor'] = pandas.DataFrame(monitor.load_results(dirname))
-                    except monitor.LoadMonitorResultsError:
+                        result['monitor'] = pandas.DataFrame(load_csv_results(dirname))
+                    except LoadMonitorResultsError:
                         print('skipping %s: no monitor files'%dirname)
                     except Exception as e:
                         print('exception loading monitor file in %s: %s'%(dirname, e))
