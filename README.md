@@ -10,6 +10,6 @@ see requirements.txt
 
 - [x] reinforcement learning plot tools
 - [x] timestamp features
-- [ ] history experiment data plot tools
+- [x] history experiment data plot tools
 - [ ] ~~basic data plot tools（including ML-Loss plot）~~
 - [ ] ~~dynamic plot tools~~

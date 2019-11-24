@@ -36,6 +36,7 @@ class Logger():
         self.start_time = time.time()
         
         logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
+        logging.info(exp_name + " start !")
 
         if use_tensorboard:
             from tensorboardX import SummaryWriter
@@ -44,11 +45,13 @@ class Logger():
 
     def add_step(self):
         self.step_counter += 1
+        return np.sum(self.steps)
     
     def add_episode(self):
         self.steps.append(self.step_counter)
         self.step_counter = 0
         self.episode_counter += 1
+        return self.episode_counter
 
     def add_reward(self, reward, freq=10):
         self.rewards.append(reward)
@@ -88,3 +91,4 @@ class Logger():
     def finish(self):
         self.csv_file.close()
         self.tf_board_writer.close()
+        self.reset()

@@ -9,9 +9,9 @@ import plot_util as pu
 import warnings
 warnings.filterwarnings('ignore')
 
-def plot(log_dir='./logs/', average_group=True, split_fn=lambda _: '', shaded_std=True, show=True):
+def plot(log_dir='./logs/', average_group=True, split_fn=lambda _: '', shaded_std=True, shaded_err=False, show=True):
     results = pu.load_results(log_dir)
-    pu.plot_results(results, average_group=average_group, split_fn=split_fn, shaded_std=shaded_std)
+    pu.plot_results(results, average_group=average_group, split_fn=split_fn, shaded_std=shaded_std, shaded_err=shaded_err, xlabel=None, ylabel=None, style='seaborn')
     plt.savefig(log_dir + 'figure', dpi=400, bbox_inches='tight')
     if show:
         plt.show()

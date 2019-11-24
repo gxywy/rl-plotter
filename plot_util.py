@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.style as style
 import os.path as osp
 import json
 import os
@@ -262,9 +263,26 @@ def load_results(root_dir_or_dirs, enable_progress=True, enable_monitor=True, ve
     if verbose: print('loaded %i results'%len(allresults))
     return allresults
 
-COLORS = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'purple', 'pink',
-        'brown', 'orange', 'teal',  'lightblue', 'lime', 'lavender', 'turquoise',
-        'darkgreen', 'tan', 'salmon', 'gold',  'darkred', 'darkblue']
+COLORS = ([
+    '#0072B2',  #deepmind
+    '#009E73',  #deepmind
+    '#D55E00',  #deepmind
+    '#CC79A7',  #deepmind
+    '#F0E442',  #deepmind
+    '#313695',  # DARK BLUE
+    '#74add1',  # LIGHT BLUE
+    '#4daf4a',  # GREEN
+    '#f46d43',  # ORANGE
+    '#d73027',  # RED
+    '#984ea3',  # PURPLE
+    '#f781bf',  # PINK
+    '#ffc832',  # YELLOW
+    '#000000',  # BLACK
+]) * 10
+
+#COLORS = ['blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'purple', 'pink',
+#        'brown', 'orange', 'teal',  'lightblue', 'lime', 'lavender', 'turquoise',
+#        'darkgreen', 'tan', 'salmon', 'gold',  'darkred', 'darkblue']
 
 
 def default_xy_fn(r):
@@ -294,7 +312,8 @@ def plot_results(
     smooth_step=1.0,
     tiling='vertical',
     xlabel=None,
-    ylabel=None
+    ylabel=None,
+    style=None
 ):
     '''
     Plot multiple Results objects
@@ -337,6 +356,8 @@ def plot_results(
                                               See docstrings for decay_steps in symmetric_ema or one_sided_ema functions.
 
     '''
+    if style is not None:
+        plt.style.use(style)
 
     if split_fn is None: split_fn = lambda _ : ''
     if group_fn is None: group_fn = lambda _ : ''
