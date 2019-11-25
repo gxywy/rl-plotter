@@ -90,5 +90,6 @@ class Logger():
 
     def finish(self):
         self.csv_file.close()
-        self.tf_board_writer.close()
         self.reset()
+        if self.use_tensorboard:
+            self.tf_board_writer.close()
