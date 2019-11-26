@@ -311,6 +311,7 @@ def plot_results(
     resample=0,
     smooth_step=1.0,
     tiling='vertical',
+    title=None,
     xlabel=None,
     ylabel=None,
     style=None
@@ -454,7 +455,9 @@ def plot_results(
                 ['%s (%i)'%(g, g2c[g]) for g in g2l] if average_group else g2l.keys(),
                 loc=2 if legend_outside else None,
                 bbox_to_anchor=(1,1) if legend_outside else None)
-        ax.set_title(sk)
+        # add title
+        #ax.set_title(sk)
+        ax.set_title(title)
         # add xlabels, but only to the bottom row
         if xlabel is not None:
             for ax in axarr[-1]:
