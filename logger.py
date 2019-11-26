@@ -33,15 +33,16 @@ class Logger():
 
         self.use_tensorboard = use_tensorboard
         self.is_learning_start = False
+        self.exp_name = exp_name
         self.start_time = time.time()
         
         logging.basicConfig(level=logging.INFO, format='%(asctime)s: %(levelname)s %(message)s')
-        logging.info(exp_name + " start !")
+        logging.info(self.exp_name + " start !")
 
         if use_tensorboard:
             from tensorboardX import SummaryWriter
             self.tf_board_writer = SummaryWriter()
-            logging.warn("tensorboardX is logger enable, please open tensorboard server in current path!")
+            logging.warn("["+ self.exp_name +"] tensorboardX is logger enable, please open tensorboard server in current path!")
 
     def add_step(self):
         self.step_counter += 1
@@ -61,7 +62,7 @@ class Logger():
             self.tf_board_writer.add_scalar('Train/reward', reward, total_step)
         
         if self.episode_counter % freq == 0:
-            logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
+            logging.info("["+ self.exp_name +"] episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
                 (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq:])))
         
         epinfo = {"r": reward, "l": self.steps[-1], "t": time.time() - self.start_time}
@@ -76,7 +77,7 @@ class Logger():
             self.tf_board_writer.add_scalar('Train/loss', loss, total_step)
         
         if not self.is_learning_start:
-            logging.warn("start learning, loss data received.")
+            logging.warn("["+ self.exp_name +"] start learning, loss data received.")
             self.is_learning_start = True
 
         #self.csv_file.write(str(total_step) +','+ str(loss)+'\n')

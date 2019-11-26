@@ -264,11 +264,11 @@ def load_results(root_dir_or_dirs, enable_progress=True, enable_monitor=True, ve
     return allresults
 
 COLORS = ([
-    '#0072B2',  #deepmind
-    '#009E73',  #deepmind
-    '#D55E00',  #deepmind
-    '#CC79A7',  #deepmind
-    '#F0E442',  #deepmind
+    '#0072B2',  # deepmind style
+    '#009E73',  # deepmind style
+    '#D55E00',  # deepmind style
+    '#CC79A7',  # deepmind style
+    '#F0E442',  # deepmind style
     '#313695',  # DARK BLUE
     '#74add1',  # LIGHT BLUE
     '#4daf4a',  # GREEN
