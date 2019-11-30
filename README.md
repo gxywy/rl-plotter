@@ -1,5 +1,7 @@
 # rl-plotter
 
+![PyPI](https://img.shields.io/pypi/v/rl_plotter?style=flat-square)![GitHub](https://img.shields.io/github/license/gxywy/rl-plotter?style=flat-square)![GitHub last commit](https://img.shields.io/github/last-commit/gxywy/rl-plotter?style=flat-square)
+
  This is a simple tool which can plot learning curves easily for reinforcement learning.
 
 ## Installation
