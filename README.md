@@ -57,9 +57,9 @@ python -m rl_plotter.plotter
 
 The learning curves looks like this:
 
-<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true" style="zoom: 33%;" />
+<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true" style="zoom: 15%;" />
 
-<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true" style="zoom: 33%;" />
+<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true" style="zoom: 15%;" />
 
 ## To Do
 
