@@ -53,16 +53,17 @@ After the training or when you are training your agent, you can plot the learnin
 ```
 python -m rl_plotter.plotter
 ```
-<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/screenshot_1.png?raw=true"/>
+for help use:
+```
+python -m rl_plotter.plotter --help
+```
 
 The learning curves looks like this:
-
-<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true" style="zoom: 15%;" />
-
-<img src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true" style="zoom: 15%;" />
+<div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
+<div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true"/></div>
+And you can custom the style of your curves by modifiying `rl_plotter.plotter`
 
 ## To Do
-
 - [x] reinforcement learning plot tools
 - [x] timestamp features
 - [x] history experiment data plot tools
