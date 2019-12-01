@@ -13,17 +13,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 class Logger():
-    def __init__(self, exp_name, env_name=None, use_tensorboard=False):
-        self.save_dir = "./logs/" + exp_name + "/"
-        if not os.path.exists(self.save_dir):
-            os.makedirs(self.save_dir)
-        self.csv_file = open(self.save_dir + 'monitor.csv', 'w')
-        header={"t_start": time.time(), 'env_id' : env_name}
-        header = '# {} \n'.format(json.dumps(header))
-        self.csv_file.write(header)
-        self.logger = csv.DictWriter(self.csv_file, fieldnames=('r', 'l', 't'))
-        self.logger.writeheader()
-        self.csv_file.flush()
+    def __init__(self, exp_name, save=True, save_dir="./logs", env_name=None, use_tensorboard=False):
+        if save:
+            self.save_dir = save_dir + "/" + exp_name + "/"
+            if not os.path.exists(self.save_dir):
+                os.makedirs(self.save_dir)
+            self.csv_file = open(self.save_dir + 'monitor.csv', 'w')
+            header={"t_start": time.time(), 'env_id' : env_name}
+            header = '# {} \n'.format(json.dumps(header))
+            self.csv_file.write(header)
+            self.logger = csv.DictWriter(self.csv_file, fieldnames=('r', 'l', 't'))
+            self.logger.writeheader()
+            self.csv_file.flush()
 
         self.step_counter = 0
         self.episode_counter = 0
@@ -31,6 +32,8 @@ class Logger():
         self.rewards = []
         self.losses = []
 
+        self.save = save
+        self.exp_name = exp_name
         self.use_tensorboard = use_tensorboard
         self.is_learning_start = False
         self.start_time = time.time()
@@ -61,12 +64,17 @@ class Logger():
             self.tf_board_writer.add_scalar('Train/reward', reward, total_step)
         
         if self.episode_counter % freq == 0:
-            logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
+            if len(self.losses) == 0:
+                logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: nan" % \
+                (self.episode_counter, np.mean(self.rewards[-freq:]), total_step))
+            else:
+                logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
                 (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq:])))
         
-        epinfo = {"r": reward, "l": self.steps[-1], "t": time.time() - self.start_time}
-        self.logger.writerow(epinfo)
-        self.csv_file.flush()
+        if self.save:
+            epinfo = {"r": reward, "l": self.steps[-1], "t": time.time() - self.start_time}
+            self.logger.writerow(epinfo)
+            self.csv_file.flush()
 
     def add_loss(self, loss):
         self.losses.append(loss)
@@ -89,7 +97,9 @@ class Logger():
         self.losses = []
 
     def finish(self):
-        self.csv_file.close()
         self.reset()
+        if self.save:
+            self.csv_file.close()
         if self.use_tensorboard:
             self.tf_board_writer.close()
+        logging.info(self.exp_name + " finished !")
