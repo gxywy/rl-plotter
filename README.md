@@ -63,7 +63,8 @@ python -m rl_plotter.plotter --help
 The learning curves looks like this:
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true"/></div>
-And you can custom the style of your curves by modifiying `rl_plotter.plotter`
+<div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_3.png?raw=true"/></div>
+And you can custom the style of your curves by use parameter of `rl_plotter.plotter`or modifying`rl_plotter.plotter`
 
 ## To Do
 - [x] reinforcement learning plot tools
