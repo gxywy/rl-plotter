@@ -6,6 +6,7 @@ __author__ = 'MICROYU'
 import argparse
 import warnings
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 from rl_plotter import plot_util as pu
 warnings.filterwarnings('ignore')
@@ -76,6 +77,13 @@ def plot(log_dir, style, title, xlabel, xlog, xlim, ylabel, legend_outside, aver
             plt.xscale('log')
         if xlim is not None:
             plt.xlim((0, xlim))
+        ## get current axis
+        ax = plt.gca()
+        if xy_fn == time_xy_fn:
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
+            ax.xaxis.set_major_formatter(ticker.FormatStrFormatter("%dh"))
+        elif xy_fn == default_xy_fn:
+            ax.xaxis.set_major_formatter(ticker.EngFormatter())
         plt.show()
 
 if __name__ == "__main__":
@@ -85,7 +93,7 @@ if __name__ == "__main__":
     if args.plot_time:
         xy_fn = time_xy_fn
         if args.xlabel is None:
-            args.xlabel = 'Training time (hours)'
+            args.xlabel = 'Training time'
     else:
         if args.xlabel is None:
             args.xlabel = 'Timesteps'
