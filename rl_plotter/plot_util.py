@@ -357,6 +357,7 @@ def plot_results(
                                               See docstrings for decay_steps in symmetric_ema or one_sided_ema functions.
 
     '''
+    ## add style
     if style is not None:
         plt.style.use(style)
 
@@ -455,7 +456,7 @@ def plot_results(
                 ['%s (%i)'%(g, g2c[g]) for g in g2l] if average_group else g2l.keys(),
                 loc=2 if legend_outside else None,
                 bbox_to_anchor=(1,1) if legend_outside else None)
-        # add title
+        ## add title
         #ax.set_title(sk)
         ax.set_title(title)
         # add xlabels, but only to the bottom row
