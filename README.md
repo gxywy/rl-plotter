@@ -66,9 +66,13 @@ The learning curves looks like this:
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_3.png?raw=true"/></div>
 And you can custom the style of your curves by use parameter of `rl_plotter.plotter`or modifying`rl_plotter.plotter`
 
-## To Do
+## Features
 - [x] reinforcement learning plot tools
-- [x] timestamp features
+- [x] timestamp x axis features
 - [x] history experiment data plot tools
+- [x] x axis formatter features
+- [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
+- [ ] compatible with [OpenAI-baseline](https://github.com/openai/baselines) progress data style
+- [ ] compatible with Tensorboard data style
 - [ ] ~~basic data plot tools（including ML-Loss plot）~~
 - [ ] ~~dynamic plot tools~~

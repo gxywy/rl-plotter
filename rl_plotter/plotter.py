@@ -21,15 +21,18 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+
 def default_xy_fn(r):
     x = np.cumsum(r.monitor.l)
     y = pu.smooth(r.monitor.r, radius=10)
     return x,y
 
+
 def time_xy_fn(r):
     x = r.monitor.t  / 60 / 60
     y = pu.smooth(r.monitor.r, radius=10)
     return x,y
+
 
 parser = argparse.ArgumentParser(description='plotter')
 parser.add_argument('--log_dir', default='./logs/', metavar='DIR',
@@ -64,27 +67,37 @@ parser.add_argument('--smooth_step', type=float, default=1.0,
                     help='when resampling (i.e. when resample > 0 or average_group is True), use this EMA decay parameter (in units of the new grid step). (default: 1.0)')
 parser.add_argument('--plot_time', type=str2bool, default=False,
                     help='plot time figure (default: False)')
+parser.add_argument('--time_interval', type=float, default=2,
+                    help='plot time x axis interval (default: 2)')
+parser.add_argument('--dpi', type=int, default=400,
+                    help='plot figure dpi (default: 400)')
 
-def plot(log_dir, style, title, xlabel, xlog, xlim, ylabel, legend_outside, average_group, shaded_std, shaded_err, 
-        resample, smooth_step, show, xy_fn=default_xy_fn, split_fn=lambda _: ''):
-    results = pu.load_results(log_dir, enable_monitor=True, enable_progress=False, verbose=False)
-    pu.plot_results(results, style=style, title=title, xlabel=xlabel, ylabel=ylabel, legend_outside=legend_outside,
-            average_group=average_group, shaded_std=shaded_std, shaded_err=shaded_err, 
-            resample=resample, smooth_step=smooth_step, xy_fn=xy_fn, split_fn=split_fn, )
-    plt.savefig(log_dir + 'figure', dpi=400, bbox_inches='tight')
+
+def plot(args, xy_fn, show=True):
+    results = pu.load_results(args.log_dir, enable_monitor=True, enable_progress=False, verbose=False)
+
+    pu.plot_results(results, style=args.style, title=args.title, xlabel=args.xlabel, ylabel=args.ylabel, 
+            legend_outside=args.legend_outside, split_fn=lambda _: '', 
+            average_group=args.average_group, shaded_std=args.shaded_std, shaded_err=args.shaded_err, 
+            resample=args.resample, smooth_step=args.smooth_step, xy_fn=xy_fn, )
+
     if show:
-        if xlog:
+        if args.xlog:
             plt.xscale('log')
-        if xlim is not None:
-            plt.xlim((0, xlim))
-        ## get current axis
-        ax = plt.gca()
+
+        ax = plt.gca() # get current axis
         if xy_fn == time_xy_fn:
-            ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(args.time_interval))
             ax.xaxis.set_major_formatter(ticker.FormatStrFormatter("%dh"))
-        elif xy_fn == default_xy_fn:
+        elif xy_fn == default_xy_fn and not args.xlog:
             ax.xaxis.set_major_formatter(ticker.EngFormatter())
+
+        if args.xlim is not None:
+            plt.xlim((0, args.xlim))
         plt.show()
+    
+    plt.savefig(args.log_dir + 'figure', dpi=args.dpi, bbox_inches='tight')
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -101,6 +114,4 @@ if __name__ == "__main__":
     if args.ylabel is None:
         args.ylabel = 'Episode Reward'
 
-    plot(args.log_dir, args.style, args.title, args.xlabel, args.xlog, args.xlim, args.ylabel,
-        args.legend_outside, args.average_group, args.shaded_std, args.shaded_err, 
-        args.resample, args.smooth_step, True, xy_fn=xy_fn)
+    plot(args, xy_fn)
