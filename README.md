@@ -71,8 +71,9 @@ And you can custom the style of your curves by use parameter of `rl_plotter.plot
 - [x] timestamp x axis features
 - [x] history experiment data plot tools
 - [x] x axis formatter features
+- [x] multiprocessing algorithm x.monitor  logger
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
 - [ ] compatible with [OpenAI-baseline](https://github.com/openai/baselines) progress data style
-- [ ] compatible with Tensorboard data style
+- [x] custom scalars logger (can be used to analyze any variable in training)
 - [ ] ~~basic data plot tools（including ML-Loss plot）~~
 - [ ] ~~dynamic plot tools~~

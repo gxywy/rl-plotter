@@ -94,9 +94,9 @@ def plot(args, xy_fn, show=True):
 
         if args.xlim is not None:
             plt.xlim((0, args.xlim))
-        plt.show()
     
     plt.savefig(args.log_dir + 'figure', dpi=args.dpi, bbox_inches='tight')
+    plt.show()
 
 
 if __name__ == "__main__":
