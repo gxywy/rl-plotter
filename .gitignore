@@ -131,3 +131,4 @@ dmypy.json
 ## mine
 backup/
 rl_plotter-preview/
+rl_plotter-history/

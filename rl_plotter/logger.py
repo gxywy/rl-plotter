@@ -6,19 +6,17 @@ __author__ = 'MICROYU'
 import csv
 import os
 import json
-import random
 import time
 import logging
-import matplotlib.pyplot as plt
 import numpy as np
 
 class Logger():
-    def __init__(self, exp_name, save=True, save_dir="./logs", env_name=None, use_tensorboard=False):
+    def __init__(self, exp_name, save=True, log_dir="./logs", env_name=None, use_tensorboard=False):
         if save:
-            self.save_dir = save_dir + "/" + exp_name + "/"
-            if not os.path.exists(self.save_dir):
-                os.makedirs(self.save_dir)
-            self.csv_file = open(self.save_dir + 'monitor.csv', 'w')
+            self.log_dir = log_dir + "/" + exp_name + "/"
+            if not os.path.exists(self.log_dir):
+                os.makedirs(self.log_dir)
+            self.csv_file = open(self.log_dir + 'monitor.csv', 'w')
             header={"t_start": time.time(), 'env_id' : env_name}
             header = '# {} \n'.format(json.dumps(header))
             self.csv_file.write(header)
