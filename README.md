@@ -71,10 +71,8 @@ optional arguments:
 
 finally, the learning curves looks like this:
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
-
 ## Features
 - [x] custom logger, style, key, label, interval, and so on ...
 - [x] multi-experiment plotter
-- [x] x-axis formatter features
 - [x] x-axis formatter features
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
