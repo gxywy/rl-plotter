@@ -6,7 +6,7 @@ __author__ = 'MICROYU'
 import argparse
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-from rl_plotter import plot_util as pu
+from rl_plotter import plot_utils as pu
 
 
 if __name__ == "__main__":
