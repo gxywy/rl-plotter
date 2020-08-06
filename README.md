@@ -32,11 +32,11 @@ env = bench.Monitor(env, log_dir)
 After the training or when you are training your agent, you can plot the learning curves in this way:
 
 ```
-python -m rl_plotter.plotter --save --show
+rl_plotter --save --show
 ```
 for help use:
 ```
-python -m rl_plotter.plotter --help
+rl_plotter --help
 ```
 
 and you can find  parameters to custom the style of your curves.
@@ -62,15 +62,16 @@ optional arguments:
 --time_interval       parameters about time, x axis time interval (default: 1)
 --xformat             x-axis format
 --xlim                x-axis limitation (default: None)
---log_dir             log dir (default: ./logs/)
+--log_dir             log dir (default: ./)
 --filename            csv filename
 --show                show figure
 --save                save figure
---dpi DPI             figure dpi (default: 400)
+--dpi                 figure dpi (default: 400)
 ```
 
 finally, the learning curves looks like this:
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
+
 ## Features
 - [x] custom logger, style, key, label, interval, and so on ...
 - [x] multi-experiment plotter

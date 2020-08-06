@@ -9,8 +9,7 @@ import matplotlib.ticker as mticker
 from rl_plotter import plot_utils as pu
 
 
-if __name__ == "__main__":
-	
+def main():
 	parser = argparse.ArgumentParser(description='plotter')
 	parser.add_argument('--fig_length', type=int, default=6, 
 						help='matplotlib figure length (default: 6)')
@@ -51,8 +50,8 @@ if __name__ == "__main__":
 	parser.add_argument('--xlim', type=int, default=None,
 						help='x-axis limitation (default: None)')
 	
-	parser.add_argument('--log_dir', default='./logs/',
-						help='log dir (default: ./logs/)')
+	parser.add_argument('--log_dir', default='./',
+						help='log dir (default: ./)')
 	parser.add_argument('--filename', default='monitor',
 						help='csv filename')
 	parser.add_argument('--show', action='store_true',
@@ -118,3 +117,7 @@ if __name__ == "__main__":
 		plt.savefig(args.log_dir + 'figure', dpi=args.dpi, bbox_inches='tight')
 	if args.show:
 		plt.show()
+
+
+if __name__ == "__main__":
+	main()
