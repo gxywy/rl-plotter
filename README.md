@@ -34,7 +34,20 @@ After the training or when you are training your agent, you can plot the learnin
 ```
 rl_plotter --save --show
 ```
+more general ussage:
+
+```
+rl_plotter --save --show --avg_group --shaded_std
+```
+
+or
+
+```
+rl_plotter --save --show --avg_group --shaded_std --shaded_err
+```
+
 for help use:
+
 ```
 rl_plotter --help
 ```
@@ -51,7 +64,7 @@ optional arguments:
 --xlabel              matplotlib figure xlabel
 --xkey                x-axis key in csv file (default: l)
 --ykey                y-axis key in csv file (default: r)
---smooth              smooth radius of y axis (default: 1)
+--smooth              smooth radius of y axis (default: 10)
 --ylabel              matplotlib figure ylabel
 --avg_group           average the curves in the same group and plot the mean
 --shaded_std          shaded region corresponding to standard deviation of the group
@@ -71,9 +84,9 @@ optional arguments:
 
 finally, the learning curves looks like this:
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
-
 ## Features
 - [x] custom logger, style, key, label, interval, and so on ...
 - [x] multi-experiment plotter
 - [x] x-axis formatter features
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
+- [x] corresponding color for specific experiment
