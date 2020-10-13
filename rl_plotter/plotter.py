@@ -25,8 +25,8 @@ def main():
 						help='x-axis key in csv file (default: l)')
 	parser.add_argument('--ykey', default='r',
 						help='y-axis key in csv file (default: r)')
-	parser.add_argument('--smooth', type=int, default=0,
-						help='smooth radius of y axis (default: 1)')
+	parser.add_argument('--smooth', type=int, default=10,
+						help='smooth radius of y axis (default: 10)')
 	parser.add_argument('--ylabel', default=None,
 						help='matplotlib figure ylabel')
 	parser.add_argument('--avg_group', action='store_true',
