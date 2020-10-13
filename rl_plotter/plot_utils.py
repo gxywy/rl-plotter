@@ -144,6 +144,8 @@ def plot_results(
 	groups = list(set(group_fn(result) for result in allresults))
 	groups_results = {}
 
+	groups.sort() # very important, determine the corresponding color of result
+
 	for result in allresults:
 		group = group_fn(result)
 		if group not in groups_results:
