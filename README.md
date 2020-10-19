@@ -18,11 +18,9 @@ from source
 python setup.py install
 ```
 
-## Examples
+## Usage
 
-First, add our logger (compatible with [OpenAI-baseline](https://github.com/openai/baselines)) in your code
-
-or just use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (recommended):
+Add our logger (compatible with [OpenAI-baseline](https://github.com/openai/baselines)) in your code or just use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (recommended):
 
 ```python
 from baselines import bench
@@ -31,22 +29,27 @@ env = bench.Monitor(env, log_dir)
 
 After the training or when you are training your agent, you can plot the learning curves in this way:
 
+- switch to log directory (default: ./)
+
+- run command to plot:
+
 ```
 rl_plotter --save --show
 ```
-more general ussage:
+
+
+
+more general commands in practice:
 
 ```
 rl_plotter --save --show --avg_group --shaded_std
-```
-
-or
-
-```
+rl_plotter --save --show --avg_group --shaded_std --time
 rl_plotter --save --show --avg_group --shaded_std --shaded_err
 ```
 
-for help use:
+
+
+for help:
 
 ```
 rl_plotter --help
@@ -82,9 +85,14 @@ optional arguments:
 --dpi                 figure dpi (default: 400)
 ```
 
+
+
 finally, the learning curves looks like this:
+
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
+
 ## Features
+
 - [x] custom logger, style, key, label, interval, and so on ...
 - [x] multi-experiment plotter
 - [x] x-axis formatter features
