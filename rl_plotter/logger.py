@@ -11,7 +11,7 @@ import logging
 import numpy as np
 
 class Logger():
-    def __init__(self, exp_name, save=True, log_dir="./logs", env_name=None, use_tensorboard=False):
+    def __init__(self, exp_name, save=True, log_dir="./logs", env_name=None):
         if save:
             self.log_dir = log_dir + "/" + exp_name + "/"
             if not os.path.exists(self.log_dir):
@@ -32,17 +32,11 @@ class Logger():
 
         self.save = save
         self.exp_name = exp_name
-        self.use_tensorboard = use_tensorboard
         self.is_learning_start = False
         self.start_time = time.time()
         
         logging.basicConfig(level=logging.INFO, format='[' + exp_name + '] %(asctime)s: %(levelname)s %(message)s')
         logging.info(self.exp_name + " start !")
-
-        if use_tensorboard:
-            from tensorboardX import SummaryWriter
-            self.tf_board_writer = SummaryWriter()
-            logging.warn("tensorboardX is logger enable, please open tensorboard server in current path!")
 
     def add_step(self):
         self.step_counter += 1
@@ -77,9 +71,6 @@ class Logger():
     def add_loss(self, loss):
         self.losses.append(loss)
         total_step = np.sum(self.steps)
-
-        if self.use_tensorboard:
-            self.tf_board_writer.add_scalar('Train/loss', loss, total_step)
         
         if not self.is_learning_start:
             logging.warn("start learning, loss data received.")
@@ -98,6 +89,4 @@ class Logger():
         self.reset()
         if self.save:
             self.csv_file.close()
-        if self.use_tensorboard:
-            self.tf_board_writer.close()
         logging.info(self.exp_name + " finished !")

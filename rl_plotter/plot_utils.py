@@ -136,6 +136,7 @@ def plot_results(
 	shaded_std=True,
 	shaded_err=False,
 	legend_outside=False,
+	filename="monitor"
 ):
 	if style is not None: plt.style.use(style)
 	plt.subplots(figsize=(fig_length , fig_width))
@@ -154,12 +155,12 @@ def plot_results(
 		current_group = groups_results[group]
 		current_group['num'] += 1
 
-		if xkey == 'l':
+		if filename == 'monitor' and xkey == 'l' :
 			x, y = np.cumsum(result['data'][xkey]), smooth(result['data'][ykey], radius=smooth_radius)
-		elif xkey == 't':
+		elif filename == 'monitor' and xkey == 't':
 			x, y = result['data'][xkey] / xscale, smooth(result['data'][ykey], radius=smooth_radius)
 		else:
-			x, y = result['data'][xkey], smooth(result['data'][ykey], radius=smooth_radius)
+			x, y = result['data'][xkey], smooth(result['data'][ykey], radius=0)
 
 		if x is None: x = np.arange(len(y))
 		x, y = map(np.asarray, (x, y))

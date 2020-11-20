@@ -95,7 +95,8 @@ def main():
 		average_group=args.avg_group,
 		shaded_std=args.shaded_std,
 		shaded_err=args.shaded_err,
-		legend_outside=args.legend_outside)
+		legend_outside=args.legend_outside,
+		filename=args.filename)
 
 	ax = plt.gca() # get current axis
 	if args.time:
