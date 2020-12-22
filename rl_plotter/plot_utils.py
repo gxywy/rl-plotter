@@ -12,6 +12,100 @@ import numpy as np
 import pandas
 from glob import glob
 
+def one_sided_ema(xolds, yolds, low=None, high=None, n=512, decay_steps=1., low_counts_threshold=1e-8):
+	'''
+	perform one-sided (causal) EMA (exponential moving average)
+	smoothing and resampling to an even grid with n points.
+	Does not do extrapolation, so we assume
+	xolds[0] <= low && high <= xolds[-1]
+	Arguments:
+	xolds: array or list  - x values of data. Needs to be sorted in ascending order
+	yolds: array of list  - y values of data. Has to have the same length as xolds
+	low: float            - min value of the new x grid. By default equals to xolds[0]
+	high: float           - max value of the new x grid. By default equals to xolds[-1]
+	n: int                - number of points in new x grid
+	decay_steps: float    - EMA decay factor, expressed in new x grid steps.
+	low_counts_threshold: float or int
+						  - y values with counts less than this value will be set to NaN
+	Returns:
+		tuple sum_ys, count_ys where
+			xs        - array with new x grid
+			ys        - array of EMA of y at each point of the new x grid
+			count_ys  - array of EMA of y counts at each point of the new x grid
+	'''
+
+	low = xolds[0] if low is None else low
+	high = xolds[-1] if high is None else high
+
+	assert xolds[0] <= low, 'low = {} < xolds[0] = {} - extrapolation not permitted!'.format(low, xolds[0])
+	assert xolds[-1] >= high, 'high = {} > xolds[-1] = {}  - extrapolation not permitted!'.format(high, xolds[-1])
+	assert len(xolds) == len(yolds), 'length of xolds ({}) and yolds ({}) do not match!'.format(len(xolds), len(yolds))
+
+
+	xolds = xolds.astype('float64')
+	yolds = yolds.astype('float64')
+
+	luoi = 0 # last unused old index
+	sum_y = 0.
+	count_y = 0.
+	xnews = np.linspace(low, high, n)
+	decay_period = (high - low) / (n - 1) * decay_steps
+	interstep_decay = np.exp(- 1. / decay_steps)
+	sum_ys = np.zeros_like(xnews)
+	count_ys = np.zeros_like(xnews)
+	for i in range(n):
+		xnew = xnews[i]
+		sum_y *= interstep_decay
+		count_y *= interstep_decay
+		while True:
+			if luoi >= len(xolds):
+				break
+			xold = xolds[luoi]
+			if xold <= xnew:
+				decay = np.exp(- (xnew - xold) / decay_period)
+				sum_y += decay * yolds[luoi]
+				count_y += decay
+				luoi += 1
+			else:
+				break
+		sum_ys[i] = sum_y
+		count_ys[i] = count_y
+
+	ys = sum_ys / count_ys
+	ys[count_ys < low_counts_threshold] = np.nan
+
+	return xnews, ys, count_ys
+
+def symmetric_ema(xolds, yolds, low=None, high=None, n=512, decay_steps=1., low_counts_threshold=1e-8):
+	'''
+	perform symmetric EMA (exponential moving average)
+	smoothing and resampling to an even grid with n points.
+	Does not do extrapolation, so we assume
+	xolds[0] <= low && high <= xolds[-1]
+	Arguments:
+	xolds: array or list  - x values of data. Needs to be sorted in ascending order
+	yolds: array of list  - y values of data. Has to have the same length as xolds
+	low: float            - min value of the new x grid. By default equals to xolds[0]
+	high: float           - max value of the new x grid. By default equals to xolds[-1]
+	n: int                - number of points in new x grid
+	decay_steps: float    - EMA decay factor, expressed in new x grid steps.
+	low_counts_threshold: float or int
+						  - y values with counts less than this value will be set to NaN
+	Returns:
+		tuple sum_ys, count_ys where
+			xs        - array with new x grid
+			ys        - array of EMA of y at each point of the new x grid
+			count_ys  - array of EMA of y counts at each point of the new x grid
+	'''
+	xs, ys1, count_ys1 = one_sided_ema(xolds, yolds, low, high, n, decay_steps, low_counts_threshold=0)
+	_,  ys2, count_ys2 = one_sided_ema(-xolds[::-1], yolds[::-1], -high, -low, n, decay_steps, low_counts_threshold=0)
+	ys2 = ys2[::-1]
+	count_ys2 = count_ys2[::-1]
+	count_ys = count_ys1 + count_ys2
+	ys = (ys1 * count_ys1 + ys2 * count_ys2) / count_ys
+	ys[count_ys < low_counts_threshold] = np.nan
+	return xs, ys, count_ys
+
 def load_csv_results(dir, filename="monitor"):
 	import pandas
 	monitor_files = (
@@ -132,12 +226,20 @@ def plot_results(
 	ykey='r',
 	xscale=1,
 	smooth_radius=0,
+	resample=0,
+	smooth_step=1.0,
 	average_group=False,
 	shaded_std=True,
 	shaded_err=False,
 	legend_outside=False,
+	legend_loc=0,
+	legend_group_num=True,
 	filename="monitor"
 ):
+	default_samples = 512
+	if average_group:
+		resample = resample or default_samples
+
 	if style is not None: plt.style.use(style)
 	plt.subplots(figsize=(fig_length , fig_width))
 
@@ -168,39 +270,59 @@ def plot_results(
 			current_group['x'].append(x)
 			current_group['y'].append(y)
 		else:
+			if resample:
+				x, y, counts = symmetric_ema(x, y, x[0], x[-1], resample, decay_steps=smooth_step)
 			legend, = plt.plot(x, y, color=COLORS[groups.index(group) % len(COLORS)])
 			current_group['legend'] = legend
 
 	if average_group:
 		for group in sorted(groups):
 			current_group = groups_results[group]
+			if not any(current_group):
+				continue
 			color = COLORS[groups.index(group) % len(COLORS)]
-
-			xlens = [len(x) for x in current_group['x']]
-			min_xlen = min(xlens)
-			index_min_xlen = xlens.index(min_xlen)
-
-			x = current_group['x'][index_min_xlen]
-			ys = [y[:min_xlen] for y in current_group['y']]
+			origxs = [x for x in current_group['x']]
+			minxlen = min(map(len, origxs))
+			def allequal(qs):
+				return all((q==qs[0]).all() for q in qs[1:])
+			if resample:
+					low  = max(x[0] for x in origxs)
+					high = min(x[-1] for x in origxs)
+					usex = np.linspace(low, high, resample)
+					ys = []
+					for (x, y) in zip(current_group['x'], current_group['y']):
+						ys.append(symmetric_ema(x, y, low, high, resample, decay_steps=1.0)[1])
+			else:
+				assert allequal([x[:minxlen] for x in origxs]),\
+					'If you want to average unevenly sampled data, set resample=<number of samples you want>'
+				usex = origxs[0]
+				ys = [xy[1][:minxlen] for xy in current_group]
 			ymean = np.mean(ys, axis=0)
 			ystd = np.std(ys, axis=0)
 			ystderr = ystd / np.sqrt(len(ys))
 
-			legend, = plt.plot(x, ymean, color=color)
+			legend, = plt.plot(usex, ymean, color=color)
 			current_group['legend'] = legend
 			if shaded_err:
-				plt.fill_between(x, ymean - ystderr, ymean + ystderr, color=color, alpha=.4)
+				plt.fill_between(usex, ymean - ystderr, ymean + ystderr, color=color, alpha=.4)
 			if shaded_std:
-				plt.fill_between(x, ymean - ystd,    ymean + ystd,    color=color, alpha=.2)
+				plt.fill_between(usex, ymean - ystd,    ymean + ystd,    color=color, alpha=.2)
 
 	# add legend
 	# https://matplotlib.org/users/legend_guide.html
 	if any(groups_results.keys()):
-		plt.legend(
-			[groups_results[key]['legend'] for key in groups_results.keys()],
-			['%s (%i)'%(key, groups_results[key]['num']) for key in groups_results.keys()] if average_group else groups_results.keys(),
-			loc=2 if legend_outside else None,
-			bbox_to_anchor=(1,1) if legend_outside else None)
+		if legend_group_num:
+			plt.legend(
+					[groups_results[key]['legend'] for key in groups_results.keys()],
+					['%s (%i)'%(key.replace('without', 'w/o'), groups_results[key]['num']) for key in groups_results.keys()] if average_group else groups_results.keys(),
+					loc=2 if legend_outside else legend_loc,
+					bbox_to_anchor=(1,1) if legend_outside else None)
+		else:
+			plt.legend(
+					[groups_results[key]['legend'] for key in groups_results.keys()],
+					['%s'%(key.replace('without', 'w/o')) for key in groups_results.keys()] if average_group else groups_results.keys(),
+					loc=2 if legend_outside else legend_loc,
+					bbox_to_anchor=(1,1) if legend_outside else None)
 	# add title
 	plt.title(title)
 	# add xlabels

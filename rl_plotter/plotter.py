@@ -25,18 +25,26 @@ def main():
 						help='x-axis key in csv file (default: l)')
 	parser.add_argument('--ykey', default='r',
 						help='y-axis key in csv file (default: r)')
-	parser.add_argument('--smooth', type=int, default=10,
-						help='smooth radius of y axis (default: 10)')
 	parser.add_argument('--ylabel', default=None,
 						help='matplotlib figure ylabel')
+	parser.add_argument('--smooth', type=int, default=10,
+					help='smooth radius of y axis (default: 10)')
+	parser.add_argument('--resample', type=int, default=512,
+						help='if not zero, size of the uniform grid in x direction to resample onto. Resampling is performed via symmetric EMA smoothing (see the docstring for symmetric_ema). Default is zero (no resampling). Note that if average_group is True, resampling is necessary; in that case, default value is 512. (default: 512)')
+	parser.add_argument('--smooth_step', type=float, default=1.0,
+						help='when resampling (i.e. when resample > 0 or average_group is True), use this EMA decay parameter (in units of the new grid step). See docstrings for decay_steps in symmetric_ema or one_sided_ema functions.')
 	parser.add_argument('--avg_group', action='store_true',
 						help='average the curves in the same group and plot the mean.')
 	parser.add_argument('--shaded_std', action='store_true',
 						help='shaded region corresponding to standard deviation of the group')
 	parser.add_argument('--shaded_err', action='store_true',
 						help='shaded region corresponding to error in mean estimate')
-	parser.add_argument('--legend_outside', action='store_true', default=False,
+	parser.add_argument('--legend_loc', type=int, default=0,
+						help='location of legend')
+	parser.add_argument('--legend_outside', action='store_true',
 						help='place the legend outside of the figure')
+	parser.add_argument('--no_legend_group_num', action='store_true',
+						help="don't show num of group in legend")
 	
 	parser.add_argument('--time', action='store_true',
 						help='enable this will set x_key to t, and activate parameters about time')
@@ -92,10 +100,14 @@ def main():
 		ykey=args.ykey,
 		xscale=xscale,
 		smooth_radius=args.smooth,
+		resample=args.resample,
+		smooth_step=args.smooth_step,
 		average_group=args.avg_group,
 		shaded_std=args.shaded_std,
 		shaded_err=args.shaded_err,
 		legend_outside=args.legend_outside,
+		legend_loc=args.legend_loc,
+		legend_group_num=not args.no_legend_group_num,
 		filename=args.filename)
 
 	ax = plt.gca() # get current axis

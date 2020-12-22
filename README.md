@@ -67,12 +67,26 @@ optional arguments:
 --xlabel              matplotlib figure xlabel
 --xkey                x-axis key in csv file (default: l)
 --ykey                y-axis key in csv file (default: r)
---smooth              smooth radius of y axis (default: 10)
 --ylabel              matplotlib figure ylabel
+--smooth              smooth radius of y axis (default: 10)
+--resample RESAMPLE   if not zero, size of the uniform grid in x direction
+                      to resample onto. Resampling is performed via
+                      symmetric EMA smoothing (see the docstring for
+                      symmetric_ema). Default is zero (no resampling). Note
+                      that if average_group is True, resampling is
+                      necessary; in that case, default value is 512.
+                      (default: 512)
+--smooth_step         when resampling (i.e. when resample > 0 or
+					  average_group is True), use this EMA decay parameter
+                      (in units of the new grid step). See docstrings for
+                      decay_steps in symmetric_ema or one_sided_ema functions. 
+                      (default: 1.0)
 --avg_group           average the curves in the same group and plot the mean
 --shaded_std          shaded region corresponding to standard deviation of the group
 --shaded_err          shaded region corresponding to error in mean estimate of the group
+--legend_loc          location of legend
 --legend_outside      place the legend outside of the figure
+--no_legend_group_num don't show num of group in legend
 --time                enable this will set x_key to t, and activate parameters about time
 --time_unit           parameters about time, x axis time unit (default: h)
 --time_interval       parameters about time, x axis time interval (default: 1)
