@@ -69,7 +69,7 @@ optional arguments:
 --ykey                y-axis key in csv file (default: r)
 --ylabel              matplotlib figure ylabel
 --smooth              smooth radius of y axis (default: 10)
---resample RESAMPLE   if not zero, size of the uniform grid in x direction
+--resample            if not zero, size of the uniform grid in x direction
                       to resample onto. Resampling is performed via
                       symmetric EMA smoothing (see the docstring for
                       symmetric_ema). Default is zero (no resampling). Note
