@@ -5,88 +5,60 @@ __author__ = 'MICROYU'
 
 import csv
 import os
-import json
-import time
-import logging
+import json, time
 import numpy as np
 
+color2num = dict(
+    gray=30,
+    red=31,
+    green=32,
+    yellow=33,
+    blue=34,
+    magenta=35,
+    cyan=36,
+    white=37,
+    crimson=38
+)
+
+def colorize(string, color, bold=False, highlight=False):
+    """
+    Colorize a string.
+
+    This function was originally written by John Schulman.
+    """
+    attr = []
+    num = color2num[color]
+    if highlight: num += 10
+    attr.append(str(num))
+    if bold: attr.append('1')
+    return '\x1b[%sm%s\x1b[0m' % (';'.join(attr), string)
+
+
 class Logger():
-    def __init__(self, exp_name, save=True, log_dir="./logs", env_name=None):
-        if save:
-            self.log_dir = log_dir + "/" + exp_name + "/"
-            if not os.path.exists(self.log_dir):
-                os.makedirs(self.log_dir)
-            self.csv_file = open(self.log_dir + 'monitor.csv', 'w')
-            header={"t_start": time.time(), 'env_id' : env_name}
-            header = '# {} \n'.format(json.dumps(header))
-            self.csv_file.write(header)
-            self.logger = csv.DictWriter(self.csv_file, fieldnames=('r', 'l', 't'))
-            self.logger.writeheader()
-            self.csv_file.flush()
+    def __init__(self, exp_name, log_dir="./logs", env_name=None):
+        self.log_dir = log_dir + "/" + exp_name + "/"
+        if not os.path.exists(self.log_dir):
+            os.makedirs(self.log_dir)
+        self.csv_file = open(self.log_dir + 'evaluator.csv', 'w', encoding='utf8')
+        header={"t_start": time.time(), 'env_id' : env_name}
+        header = '# {} \n'.format(json.dumps(header))
+        self.csv_file.write(header)
+        self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
+        self.logger.writeheader()
+        self.csv_file.flush()
 
-        self.step_counter = 0
-        self.episode_counter = 0
-        self.steps = []
-        self.rewards = []
-        self.losses = []
+    def update(self, score, total_steps):
+        '''
+            Score is a list
+        '''
+        avg_score = np.mean(score)
+        std_score = np.std(score)
+        max_score = np.max(score)
+        min_score = np.min(score)
 
-        self.save = save
-        self.exp_name = exp_name
-        self.is_learning_start = False
-        self.start_time = time.time()
+        print(colorize(f"\nEvaluation over {len(score)} episodes after {total_steps}:", 'yellow', bold=True))
+        print(colorize(f"Avg: {avg_score:.3f} Std: {std_score:.3f} Max: {max_score:.3f} Min: {min_score:.3f}\n", 'yellow', bold=True))
         
-        logging.basicConfig(level=logging.INFO, format='[' + exp_name + '] %(asctime)s: %(levelname)s %(message)s')
-        logging.info(self.exp_name + " start !")
-
-    def add_step(self):
-        self.step_counter += 1
-        return np.sum(self.steps)
-    
-    def add_episode(self):
-        self.steps.append(self.step_counter)
-        self.step_counter = 0
-        self.episode_counter += 1
-        return self.episode_counter
-
-    def add_reward(self, reward, freq=10):
-        self.rewards.append(reward)
-        total_step = np.sum(self.steps)
-
-        if self.use_tensorboard:
-            self.tf_board_writer.add_scalar('Train/reward', reward, total_step)
-        
-        if self.episode_counter % freq == 0:
-            if len(self.losses) == 0:
-                logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: nan" % \
-                (self.episode_counter, np.mean(self.rewards[-freq:]), total_step))
-            else:
-                logging.info("episodes: %d, mean reward: %.2f, steps: %d, mean loss: %f" % \
-                (self.episode_counter, np.mean(self.rewards[-freq:]), total_step, np.mean(self.losses[-freq:])))
-        
-        if self.save:
-            epinfo = {"r": reward, "l": self.steps[-1], "t": time.time() - self.start_time}
-            self.logger.writerow(epinfo)
-            self.csv_file.flush()
-
-    def add_loss(self, loss):
-        self.losses.append(loss)
-        total_step = np.sum(self.steps)
-        
-        if not self.is_learning_start:
-            logging.warn("start learning, loss data received.")
-            self.is_learning_start = True
-
-        #self.csv_file.write(str(total_step) +','+ str(loss)+'\n')
-        #self.csv_file.flush()
-
-    def reset(self):
-        self.episode_counter = 0
-        self.step_counter = 0
-        self.rewards = []
-        self.losses = []
-
-    def finish(self):
-        self.reset()
-        if self.save:
-            self.csv_file.close()
-        logging.info(self.exp_name + " finished !")
+        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": max_score}
+        self.logger.writerow(epinfo)
+        self.csv_file.flush()

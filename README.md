@@ -20,7 +20,16 @@ python setup.py install
 
 ## Usage
 
-Add our logger (compatible with [OpenAI-baseline](https://github.com/openai/baselines)) in your code or just use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (recommended):
+Add our logger in your code of evaluation
+
+```python
+from rl_plotter.logger import Logger
+logger = Logger(exp_name="your_exp_name", log_dir, env_name)
+····
+logger.update(score=evaluation_score_list, total_steps=current_training_steps)
+```
+
+or just use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (recommended):
 
 ```python
 from baselines import bench
