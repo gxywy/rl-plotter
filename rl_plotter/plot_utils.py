@@ -126,12 +126,15 @@ def load_csv_results(dir, filename="monitor"):
 				headers.append(header)
 			else:
 				assert 0, 'unreachable'
-			df['t'] += header['t_start']
+			if filename=="monitor":
+				df['t'] += header['t_start']
 		dfs.append(df)
 	df = pandas.concat(dfs)
-	df.sort_values('t', inplace=True)
+	if filename=="monitor":
+		df.sort_values('t', inplace=True)
 	df.reset_index(inplace=True)
-	df['t'] -= min(header['t_start'] for header in headers)
+	if filename=="monitor":
+		df['t'] -= min(header['t_start'] for header in headers)
 	#df.headers = headers # HACK to preserve backwards compatibility
 	return df
 
