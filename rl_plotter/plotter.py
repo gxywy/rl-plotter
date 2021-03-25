@@ -88,6 +88,10 @@ def main():
 	if args.ylabel is None:
 		args.ylabel = 'Episode Reward'
 
+	if args.filename == 'evaluator':
+		args.xkey = 'total_steps'
+		args.ykey = 'mean_score'
+
 	allresults = pu.load_results(args.log_dir, filename=args.filename)
 	pu.plot_results(allresults,
 		fig_length=args.fig_length,
