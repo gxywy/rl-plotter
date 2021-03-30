@@ -35,8 +35,8 @@ def colorize(string, color, bold=False, highlight=False):
 
 
 class Logger():
-    def __init__(self, exp_name, log_dir="./logs", env_name=None):
-        self.log_dir = log_dir + "/" + exp_name + "/"
+    def __init__(self, log_dir="./logs", exp_name="exp", env_name=None, seed=0):
+        self.log_dir = log_dir = f"{log_dir}/{exp_name}_{env_name}-{seed}"
         if not os.path.exists(self.log_dir):
             os.makedirs(self.log_dir)
         self.csv_file = open(self.log_dir + 'evaluator.csv', 'w', encoding='utf8')
@@ -46,6 +46,11 @@ class Logger():
         self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
         self.logger.writeheader()
         self.csv_file.flush()
+
+    def monitor_env(self, env):
+        from baselines import bench
+        env = bench.Monitor(env, self.log_dir, allow_early_resets=True)
+        return env
 
     def update(self, score, total_steps):
         '''
