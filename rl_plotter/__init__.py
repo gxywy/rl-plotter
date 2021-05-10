@@ -1,1 +1,1 @@
-__all__ = ["logger", "plotter", "plot_util"]
+__all__ = ["logger", "plotter", "plot_utils"]

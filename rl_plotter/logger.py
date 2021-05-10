@@ -35,12 +35,18 @@ def colorize(string, color, bold=False, highlight=False):
 
 
 class Logger():
-    def __init__(self, log_dir="./logs", exp_name="exp", env_name=None, seed=0):
-        self.log_dir = log_dir = f"{log_dir}/{exp_name}_{env_name}-{seed}"
-        if not os.path.exists(self.log_dir):
-            os.makedirs(self.log_dir)
-        self.csv_file = open(self.log_dir + 'evaluator.csv', 'w', encoding='utf8')
-        header={"t_start": time.time(), 'env_id' : env_name}
+    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0):
+        num_exps = 0
+        self.log_dir = f"./{log_dir}/{exp_name}_{env_name}_seed{seed}"
+        while True:
+            if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
+                num_exps += 1
+            else:
+                self.log_dir += f"-{str(num_exps)}/"
+                os.makedirs(self.log_dir)
+                break
+        self.csv_file = open(self.log_dir + '/evaluator.csv', 'w', encoding='utf8')
+        header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
         header = '# {} \n'.format(json.dumps(header))
         self.csv_file.write(header)
         self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
@@ -65,5 +71,37 @@ class Logger():
         print(colorize(f"Avg: {avg_score:.3f} Std: {std_score:.3f} Max: {max_score:.3f} Min: {min_score:.3f}\n", 'yellow', bold=True))
         
         epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": max_score}
+        self.logger.writerow(epinfo)
+        self.csv_file.flush()
+
+class CustomLogger():
+    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv", fieldnames=[]):
+        self.fieldnames = ["total_steps"] + fieldnames
+        num_exps = 0
+        self.log_dir = f"./{log_dir}/{exp_name}_{env_name}_seed{seed}"
+        while True:
+            if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
+                num_exps += 1
+            else:
+                self.log_dir += f"-{str(num_exps)}/"
+                os.makedirs(self.log_dir)
+                break
+        self.csv_file = open(self.log_dir + '/' + filename, 'w', encoding='utf8')
+        header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
+        header = '# {} \n'.format(json.dumps(header))
+        self.csv_file.write(header)
+        self.logger = csv.DictWriter(self.csv_file, fieldnames=(self.fieldnames))
+        self.logger.writeheader()
+        self.csv_file.flush()
+
+    def update(self, fieldvalues, total_steps):
+
+        print(colorize(f"\nCustomLogger with fileds: {self.fieldnames}", 'yellow', bold=True))
+        print(colorize(f"total_steps: {total_steps}, fieldvalues: {fieldvalues}\n", 'yellow', bold=True))
+        
+        epinfo = {}
+        fieldvalues = [total_steps] + fieldvalues
+        for filedname, filedvalue in zip(self.fieldnames, fieldvalues):
+                epinfo.update({filedname: filedvalue})
         self.logger.writerow(epinfo)
         self.csv_file.flush()
