@@ -36,8 +36,12 @@ def colorize(string, color, bold=False, highlight=False):
 
 class Logger():
     def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0):
+        self.exp_name = exp_name
+        self.env_name = env_name
+        self.seed = seed
+
         num_exps = 0
-        self.log_dir = f"./{log_dir}/{exp_name}_{env_name}_seed{seed}"
+        self.log_dir = f"./{log_dir}/{exp_name.replace('-', '_')}_{env_name.replace('-', '_')}_seed{seed}"
         while True:
             if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
                 num_exps += 1
@@ -73,20 +77,15 @@ class Logger():
         epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": max_score}
         self.logger.writerow(epinfo)
         self.csv_file.flush()
+    
+    def new_custom_logger(self, filename=None, fieldnames=[]):
+        custom_logger = CustomLogger(self.log_dir, self.exp_name, self.env_name, self.seed, filename, fieldnames)
+        return custom_logger
 
 class CustomLogger():
     def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv", fieldnames=[]):
         self.fieldnames = ["total_steps"] + fieldnames
-        num_exps = 0
-        self.log_dir = f"./{log_dir}/{exp_name}_{env_name}_seed{seed}"
-        while True:
-            if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
-                num_exps += 1
-            else:
-                self.log_dir += f"-{str(num_exps)}/"
-                os.makedirs(self.log_dir)
-                break
-        self.csv_file = open(self.log_dir + '/' + filename, 'w', encoding='utf8')
+        self.csv_file = open(log_dir + '/' + filename, 'w', encoding='utf8')
         header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
         header = '# {} \n'.format(json.dumps(header))
         self.csv_file.write(header)
@@ -95,7 +94,6 @@ class CustomLogger():
         self.csv_file.flush()
 
     def update(self, fieldvalues, total_steps):
-
         print(colorize(f"\nCustomLogger with fileds: {self.fieldnames}", 'yellow', bold=True))
         print(colorize(f"total_steps: {total_steps}, fieldvalues: {fieldvalues}\n", 'yellow', bold=True))
         

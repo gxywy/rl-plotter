@@ -24,7 +24,7 @@ Add our logger in your code of evaluation
 
 ```python
 from rl_plotter.logger import Logger
-logger = Logger(exp_name="your_exp_name", log_dir, env_name)
+logger = Logger(exp_name="your_exp_name", env_name, seed)
 ····
 logger.update(score=evaluation_score_list, total_steps=current_training_steps)
 ```
@@ -34,6 +34,15 @@ or you can use [OpenAI-baseline](https://github.com/openai/baselines) bench.Moni
 ```python
 env = logger.monitor_env(env)
 ```
+
+if you want to track other variables:
+
+```python
+custom_logger=logger.new_custom_logger(filename, fieldnames=["variable 1", "variable 2", ..., "variable n"])
+custom_logger.update(fieldvalues=variable_value_list, total_steps=current_training_steps)
+```
+
+
 
 After the training or when you are training your agent, you can plot the learning curves in this way:
 
