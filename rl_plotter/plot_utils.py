@@ -138,7 +138,7 @@ def load_csv_results(dir, filename="monitor"):
 	#df.headers = headers # HACK to preserve backwards compatibility
 	return df
 
-def load_results(root_dir_or_dirs="./", filename="monitor"):
+def load_results(root_dir_or_dirs="./", filename="monitor", filter=""):
 
 	if isinstance(root_dir_or_dirs, str):
 		rootdirs = [osp.expanduser(root_dir_or_dirs)]
@@ -149,14 +149,15 @@ def load_results(root_dir_or_dirs="./", filename="monitor"):
 	for rootdir in rootdirs:
 		assert osp.exists(rootdir), "%s doesn't exist"%rootdir
 		for dirname, dirs, files in os.walk(rootdir):
-			result = {'dirname' : dirname, "data": None}
+			if filter in dirname:
+				result = {'dirname' : dirname, "data": None}
 
-			file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename + r'\.csv')
-			if any([f for f in files if file_re.match(f)]):
-				result['data'] = pandas.DataFrame(load_csv_results(dirname, filename))
+				file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename + r'\.csv')
+				if any([f for f in files if file_re.match(f)]):
+					result['data'] = pandas.DataFrame(load_csv_results(dirname, filename))
 
-			if result['data'] is not None:
-				allresults.append(result)
+				if result['data'] is not None:
+					allresults.append(result)
 	return allresults
 
 

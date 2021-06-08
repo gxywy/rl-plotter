@@ -53,14 +53,16 @@ def main():
 	parser.add_argument('--time_interval', type=float, default=1,
 						help='parameters about time, x axis time interval (default: 1)')
 
-	parser.add_argument('--xformat', default='eng',
+	parser.add_argument('--xformat', default='',
 						help='x-axis format')
 	parser.add_argument('--xlim', type=int, default=None,
 						help='x-axis limitation (default: None)')
 	
 	parser.add_argument('--log_dir', default='./',
 						help='log dir (default: ./)')
-	parser.add_argument('--filename', default='monitor',
+	parser.add_argument('--filter', default='',
+						help='filter of dirname')
+	parser.add_argument('--filename', default='evaluator',
 						help='csv filename')
 	parser.add_argument('--show', action='store_true',
 						help='show figure')
@@ -92,7 +94,7 @@ def main():
 		args.xkey = 'total_steps'
 		args.ykey = 'mean_score'
 
-	allresults = pu.load_results(args.log_dir, filename=args.filename)
+	allresults = pu.load_results(args.log_dir, filename=args.filename, filter=args.filter)
 	pu.plot_results(allresults,
 		fig_length=args.fig_length,
 		fig_width=args.fig_width,
@@ -125,7 +127,10 @@ def main():
 		elif args.xformat == 'log':
 			ax.xaxis.set_major_formatter(mticker.LogFormatter())
 		elif args.xformat == 'sci':
-			ax.xaxis.set_major_formatter(mticker.LogFormatterSciNotation())
+			#ax.xaxis.set_major_formatter(mticker.LogFormatterSciNotation())
+			plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=True)
+		else:
+			plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0), useMathText=False)
 
 	if args.xlim is not None:
 		plt.xlim((0, args.xlim))

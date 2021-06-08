@@ -110,6 +110,7 @@ optional arguments:
 --xformat             x-axis format
 --xlim                x-axis limitation (default: None)
 --log_dir             log dir (default: ./)
+--filter              filter of dirname
 --filename            csv filename
 --show                show figure
 --save                save figure
@@ -125,6 +126,7 @@ finally, the learning curves looks like this:
 ## Features
 
 - [x] custom logger, style, key, label, interval, and so on ...
+- [x] filter of directory name
 - [x] multi-experiment plotter
 - [x] x-axis formatter features
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
