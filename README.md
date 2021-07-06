@@ -123,6 +123,7 @@ finally, the learning curves looks like this:
 
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
 
+
 ## Features
 
 - [x] custom logger, style, key, label, interval, and so on ...
@@ -131,3 +132,18 @@ finally, the learning curves looks like this:
 - [x] x-axis formatter features
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
 - [x] corresponding color for specific experiment
+
+## Citing the Project
+
+To cite this repository in publications:
+
+```
+@misc{rl-plotter,
+  author = {Xiaoyu Gong},
+  title = {RL Plotter},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/gxywy/rl-plotter}},
+}
+```
