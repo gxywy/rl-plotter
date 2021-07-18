@@ -140,10 +140,11 @@ To cite this repository in publications:
 ```
 @misc{rl-plotter,
   author = {Xiaoyu Gong},
-  title = {RL Plotter},
+  title = {RL-plotter: A plotter for reinforcement learning},
   year = {2020},
   publisher = {GitHub},
   journal = {GitHub repository},
   howpublished = {\url{https://github.com/gxywy/rl-plotter}},
 }
 ```
+
