@@ -127,12 +127,12 @@ finally, the learning curves looks like this:
 ```
 rl_plotter --show --save --avg_group --shaded_err --shaded_std
 ```
-<div align="center"><img width="300" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
+<div align="center"><img width="400" height="300" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
 
 ```
 rl_plotter --show --save --avg_group --shaded_err --shaded_std --filename q --filters Walker HalfCheetah --ykey bias real_q --yduel --style default --smooth 0
 ```
-<div align="center"><img width="300" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true"/></div>
+<div align="center"><img width="400" height="300" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true"/></div>
 
 
 
