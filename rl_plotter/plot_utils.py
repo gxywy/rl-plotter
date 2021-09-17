@@ -138,7 +138,7 @@ def load_csv_results(dir, filename="monitor"):
 	#df.headers = headers # HACK to preserve backwards compatibility
 	return df
 
-def load_results(root_dir_or_dirs="./", filename="monitor", filter=""):
+def load_results(root_dir_or_dirs="./", filename="monitor", filters=[]):
 
 	if isinstance(root_dir_or_dirs, str):
 		rootdirs = [osp.expanduser(root_dir_or_dirs)]
@@ -149,15 +149,16 @@ def load_results(root_dir_or_dirs="./", filename="monitor", filter=""):
 	for rootdir in rootdirs:
 		assert osp.exists(rootdir), "%s doesn't exist"%rootdir
 		for dirname, dirs, files in os.walk(rootdir):
-			if filter in dirname:
-				result = {'dirname' : dirname, "data": None}
+			for filter in filters:
+				if filter in dirname:
+					result = {'dirname' : dirname, "data": None}
 
-				file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename + r'\.csv')
-				if any([f for f in files if file_re.match(f)]):
-					result['data'] = pandas.DataFrame(load_csv_results(dirname, filename))
+					file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename + r'\.csv')
+					if any([f for f in files if file_re.match(f)]):
+						result['data'] = pandas.DataFrame(load_csv_results(dirname, filename))
 
-				if result['data'] is not None:
-					allresults.append(result)
+					if result['data'] is not None:
+						allresults.append(result)
 	return allresults
 
 
@@ -227,7 +228,8 @@ def plot_results(
 	xlabel=None,
 	ylabel=None,
 	xkey='l',
-	ykey='r',
+	ykey=['r'],
+	yduel=False,
 	xscale=1,
 	smooth_radius=0,
 	resample=0,
@@ -238,6 +240,8 @@ def plot_results(
 	legend_outside=False,
 	legend_loc=0,
 	legend_group_num=True,
+	legend_borderpad=1.0,
+	legend_labelspacing=1.0,
 	filename="monitor"
 ):
 	default_samples = 512
@@ -245,40 +249,71 @@ def plot_results(
 		resample = resample or default_samples
 
 	if style is not None: plt.style.use(style)
-	plt.subplots(figsize=(fig_length , fig_width))
+	_, plt1 = plt.subplots(figsize=(fig_length , fig_width))
 
 	if group_fn is None: group_fn = lambda _ : ''
-	groups = list(set(group_fn(result) for result in allresults))
+	groups_raw = list(set(group_fn(result) for result in allresults))
+	
+	# handle n-ykey
+	if len(ykey) > 1:
+		groups = []
+		for group in groups_raw:
+			for key in ykey:
+				groups.append(group + "_" + key)
+	else:
+		groups = groups_raw
+		
 	groups_results = {}
-
 	groups.sort() # very important, determine the corresponding color of result
 
+	# handle dual y
+	if len(ykey) == 2 and yduel:
+		plt2 = plt1.twinx()
+
 	for result in allresults:
-		group = group_fn(result)
-		if group not in groups_results:
-			group_info = {'num': 0, 'legend': None, 'x': [], 'y': []}
-			groups_results[group] = group_info
-		current_group = groups_results[group]
-		current_group['num'] += 1
+		group_raw = group_fn(result)
 
-		if filename == 'monitor' and xkey == 'l' :
-			x, y = np.cumsum(result['data'][xkey]), smooth(result['data'][ykey], radius=smooth_radius)
-		elif filename == 'monitor' and xkey == 't':
-			x, y = result['data'][xkey] / xscale, smooth(result['data'][ykey], radius=smooth_radius)
-		else:
-			x, y = result['data'][xkey], smooth(result['data'][ykey], radius=0)
+		for key in ykey: # handle n-ykey
+			if len(ykey) > 1:
+				group = group_raw + "_" + key
+			else:
+				group = group_raw
 
-		if x is None: x = np.arange(len(y))
-		x, y = map(np.asarray, (x, y))
-		if average_group:
-			current_group['x'].append(x)
-			current_group['y'].append(y)
-		else:
-			if resample:
-				x, y, counts = symmetric_ema(x, y, x[0], x[-1], resample, decay_steps=smooth_step)
-			legend, = plt.plot(x, y, color=COLORS[groups.index(group) % len(COLORS)])
-			current_group['legend'] = legend
+			if (ykey[0] in group or len(ykey) != 2) or not yduel: # handle dual y
+				pltt = plt1
+			else:
+				pltt = plt2
+			
+			if group not in groups_results:
+				group_info = {'num': 0, 'legend': None, 'x': [], 'y': [], 'ykey': key}
+				groups_results[group] = group_info
+			current_group = groups_results[group]
+			current_group['num'] += 1
+			
+			if filename == 'monitor' and xkey == 'l' :
+				x, y = np.cumsum(result['data'][xkey]), smooth(result['data'][key], radius=smooth_radius)
+			elif filename == 'monitor' and xkey == 't':
+				x, y = result['data'][xkey] / xscale, smooth(result['data'][key], radius=smooth_radius)
+			else:
+				x, y = result['data'][xkey], smooth(result['data'][key], radius=smooth_radius)
 
+			if x is None: x = np.arange(len(y))
+			x, y = map(np.asarray, (x, y))
+			if average_group:
+				current_group['x'].append(x)
+				current_group['y'].append(y)
+			else:
+				if resample:
+					x, y, counts = symmetric_ema(x, y, x[0], x[-1], resample, decay_steps=smooth_step)
+					legend, = pltt.plot(x, y, color=COLORS[groups.index(group) % len(COLORS)])
+					# handle dual y label
+				if ylabel is not None:
+					if yduel:
+						pltt.set_ylabel(current_group['ykey'])
+					else:
+						pltt.set_ylabel(ylabel)
+				current_group['legend'] = legend
+			
 	if average_group:
 		for group in sorted(groups):
 			current_group = groups_results[group]
@@ -305,33 +340,42 @@ def plot_results(
 			ystd = np.std(ys, axis=0)
 			ystderr = ystd / np.sqrt(len(ys))
 
-			legend, = plt.plot(usex, ymean, color=color)
+			# handle dual y
+			if (ykey[0] in group or len(ykey) != 2) or not yduel:
+				pltt = plt1
+			else:
+				pltt = plt2
+			legend, = pltt.plot(usex, ymean, color=color)
+			# handle dual y label
+			if ylabel is not None:
+				if yduel:
+					pltt.set_ylabel(current_group['ykey'])
+				else:
+					pltt.set_ylabel(ylabel)
+			
 			current_group['legend'] = legend
 			if shaded_err:
-				plt.fill_between(usex, ymean - ystderr, ymean + ystderr, color=color, alpha=.4)
+				pltt.fill_between(usex, ymean - ystderr, ymean + ystderr, color=color, alpha=.4)
 			if shaded_std:
-				plt.fill_between(usex, ymean - ystd,    ymean + ystd,    color=color, alpha=.2)
+				pltt.fill_between(usex, ymean - ystd,    ymean + ystd,    color=color, alpha=.2)
 
 	# add legend
-	# https://matplotlib.org/users/legend_guide.html
+	# https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.legend.html
 	if any(groups_results.keys()):
 		if legend_group_num:
 			plt.legend(
 					[groups_results[key]['legend'] for key in groups_results.keys()],
-					['%s (%i)'%(key.replace('without', 'w/o'), groups_results[key]['num']) for key in groups_results.keys()] if average_group else groups_results.keys(),
-					loc=2 if legend_outside else legend_loc,
-					bbox_to_anchor=(1,1) if legend_outside else None)
+					['%s (%i)'%(key.replace('without', 'w/o').replace('_', '-'), groups_results[key]['num']) for key in groups_results.keys()] if average_group else groups_results.keys(),
+					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing,ncol= len(groups_results.keys()) if legend_outside else 1)
 		else:
 			plt.legend(
 					[groups_results[key]['legend'] for key in groups_results.keys()],
-					['%s'%(key.replace('without', 'w/o')) for key in groups_results.keys()] if average_group else groups_results.keys(),
-					loc=2 if legend_outside else legend_loc,
-					bbox_to_anchor=(1,1) if legend_outside else None)
+					['%s'%(key.replace('without', 'w/o').replace('_', '-')) for key in groups_results.keys()] if average_group else groups_results.keys(),
+					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing,ncol= len(groups_results.keys()) if legend_outside else 1)
 	# add title
 	plt.title(title)
 	# add xlabels
 	if xlabel is not None: plt.xlabel(xlabel)
-	if ylabel is not None: plt.ylabel(ylabel)
 
 
 if __name__ == "__main__":

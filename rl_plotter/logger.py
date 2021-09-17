@@ -74,7 +74,7 @@ class Logger():
         print(colorize(f"\nEvaluation over {len(score)} episodes after {total_steps}:", 'yellow', bold=True))
         print(colorize(f"Avg: {avg_score:.3f} Std: {std_score:.3f} Max: {max_score:.3f} Min: {min_score:.3f}\n", 'yellow', bold=True))
         
-        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": max_score}
+        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
         self.logger.writerow(epinfo)
         self.csv_file.flush()
     

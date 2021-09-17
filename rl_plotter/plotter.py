@@ -11,8 +11,8 @@ from rl_plotter import plot_utils as pu
 
 def main():
 	parser = argparse.ArgumentParser(description='plotter')
-	parser.add_argument('--fig_length', type=int, default=6, 
-						help='matplotlib figure length (default: 6)')
+	parser.add_argument('--fig_length', type=int, default=8, 
+						help='matplotlib figure length (default: 8)')
 	parser.add_argument('--fig_width', type=int, default=6, 
 						help='matplotlib figure width (default: 6)')
 	parser.add_argument('--style', default='seaborn',
@@ -23,12 +23,14 @@ def main():
 						help='matplotlib figure xlabel')
 	parser.add_argument('--xkey', default='l',
 						help='x-axis key in csv file (default: l)')
-	parser.add_argument('--ykey', default='r',
-						help='y-axis key in csv file (default: r)')
+	parser.add_argument('--ykey', default=['r'], nargs='+',
+						help='y-axis key in csv file (support multi) (default: r)')
+	parser.add_argument('--yduel', action='store_true',
+						help='=duel y axis (use if has two ykeys)')
 	parser.add_argument('--ylabel', default=None,
 						help='matplotlib figure ylabel')
-	parser.add_argument('--smooth', type=int, default=10,
-					help='smooth radius of y axis (default: 10)')
+	parser.add_argument('--smooth', type=int, default=5,
+					help='smooth radius of y axis (default: 5)')
 	parser.add_argument('--resample', type=int, default=512,
 						help='if not zero, size of the uniform grid in x direction to resample onto. Resampling is performed via symmetric EMA smoothing (see the docstring for symmetric_ema). Default is zero (no resampling). Note that if average_group is True, resampling is necessary; in that case, default value is 512. (default: 512)')
 	parser.add_argument('--smooth_step', type=float, default=1.0,
@@ -43,6 +45,10 @@ def main():
 						help='location of legend')
 	parser.add_argument('--legend_outside', action='store_true',
 						help='place the legend outside of the figure')
+	parser.add_argument('--borderpad', type=float, default=0.5,
+						help='borderpad of legend (default: 0.5)')
+	parser.add_argument('--labelspacing', type=float, default=0.5,
+						help='labelspacing of legend (default: 0.5)')
 	parser.add_argument('--no_legend_group_num', action='store_true',
 						help="don't show num of group in legend")
 	
@@ -60,8 +66,8 @@ def main():
 	
 	parser.add_argument('--log_dir', default='./',
 						help='log dir (default: ./)')
-	parser.add_argument('--filter', default='',
-						help='filter of dirname')
+	parser.add_argument('--filters', default=[''], nargs='+',
+						help='filters of dirname')
 	parser.add_argument('--filename', default='evaluator',
 						help='csv filename')
 	parser.add_argument('--show', action='store_true',
@@ -90,11 +96,12 @@ def main():
 	if args.ylabel is None:
 		args.ylabel = 'Episode Reward'
 
-	if args.filename == 'evaluator':
+	if args.filename != 'monitor':
 		args.xkey = 'total_steps'
-		args.ykey = 'mean_score'
+		if args.ykey == ['r']:
+			args.ykey = ['mean_score']
 
-	allresults = pu.load_results(args.log_dir, filename=args.filename, filter=args.filter)
+	allresults = pu.load_results(args.log_dir, filename=args.filename, filters=args.filters)
 	pu.plot_results(allresults,
 		fig_length=args.fig_length,
 		fig_width=args.fig_width,
@@ -104,6 +111,7 @@ def main():
 		ylabel=args.ylabel,
 		xkey=args.xkey,
 		ykey=args.ykey,
+		yduel=args.yduel,
 		xscale=xscale,
 		smooth_radius=args.smooth,
 		resample=args.resample,
@@ -114,6 +122,8 @@ def main():
 		legend_outside=args.legend_outside,
 		legend_loc=args.legend_loc,
 		legend_group_num=not args.no_legend_group_num,
+		legend_borderpad=args.borderpad,
+		legend_labelspacing=args.labelspacing,
 		filename=args.filename)
 
 	ax = plt.gca() # get current axis
@@ -134,11 +144,13 @@ def main():
 
 	if args.xlim is not None:
 		plt.xlim((0, args.xlim))
-	
+
 	if args.save:
 		plt.savefig(args.log_dir + 'figure', dpi=args.dpi, bbox_inches='tight')
 	if args.show:
 		plt.show()
+	
+	
 
 
 if __name__ == "__main__":

@@ -77,13 +77,14 @@ and you can find  parameters to custom the style of your curves.
 ```
 optional arguments:
 -h, --help            show this help message and exit
---fig_length          matplotlib figure length (default: 6)
+--fig_length          matplotlib figure length (default: 8)
 --fig_width           matplotlib figure width (default: 6)
 --style               matplotlib figure style (default: seaborn)
 --title               matplotlib figure title (default: None)
 --xlabel              matplotlib figure xlabel
 --xkey                x-axis key in csv file (default: l)
---ykey                y-axis key in csv file (default: r)
+--ykey                y-axis key in csv file (support multi) (default: r)
+--yduel               duel y axis (use if has two ykeys)
 --ylabel              matplotlib figure ylabel
 --smooth              smooth radius of y axis (default: 10)
 --resample            if not zero, size of the uniform grid in x direction
@@ -103,6 +104,8 @@ optional arguments:
 --shaded_err          shaded region corresponding to error in mean estimate of the group
 --legend_loc          location of legend
 --legend_outside      place the legend outside of the figure
+--borderpad           borderpad of legend (default: 0.5)
+--labelspacing        labelspacing of legend (default: 0.5)
 --no_legend_group_num don't show num of group in legend
 --time                enable this will set x_key to t, and activate parameters about time
 --time_unit           parameters about time, x axis time unit (default: h)
@@ -110,7 +113,7 @@ optional arguments:
 --xformat             x-axis format
 --xlim                x-axis limitation (default: None)
 --log_dir             log dir (default: ./)
---filter              filter of dirname
+--filters             filter of dirname
 --filename            csv filename
 --show                show figure
 --save                save figure
@@ -121,21 +124,41 @@ optional arguments:
 
 finally, the learning curves looks like this:
 
+```
+rl_plotter --show --save --avg_group --shaded_err --shaded_std
+```
 <div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_1.png?raw=true"/></div>
+
+```
+rl_plotter --show --save --avg_group --shaded_err --shaded_std --filename q --filters Walker HalfCheetah --ykey bias real_q --yduel --style default --smooth 0
+```
+<div align="center"><img width="400" height="400" src="https://github.com/gxywy/rl-plotter/blob/master/imgs/figure_2.png?raw=true"/></div>
+
+
+
 
 
 ## Features
 
 - [x] custom logger, style, key, label, interval, and so on ...
+
 - [x] filter of directory name
+
 - [x] multi-experiment plotter
-- [x] x-axis formatter features
+
+- [x] x-axis formatter
+
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor data style
+
 - [x] corresponding color for specific experiment
+
+- [x] multi y key & duel y legend
+
+  
 
 ## Citing the Project
 
-To cite this repository in publications:
+If using this repository for your research or publication, please cite:
 
 ```
 @misc{rl-plotter,
