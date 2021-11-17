@@ -21,9 +21,9 @@ def main():
 						help='matplotlib figure title (default: None)')
 	parser.add_argument('--xlabel', default=None,
 						help='matplotlib figure xlabel')
-	parser.add_argument('--xkey', default='l',
+	parser.add_argument('--xkey', default='total_steps',
 						help='x-axis key in csv file (default: l)')
-	parser.add_argument('--ykey', default=['r'], nargs='+',
+	parser.add_argument('--ykey', default=['mean_score'], nargs='+',
 						help='y-axis key in csv file (support multi) (default: r)')
 	parser.add_argument('--yduel', action='store_true',
 						help='=duel y axis (use if has two ykeys)')
@@ -53,7 +53,7 @@ def main():
 						help="don't show num of group in legend")
 	
 	parser.add_argument('--time', action='store_true',
-						help='enable this will set x_key to t, and activate parameters about time')
+						help='enable this will activate parameters about time')
 	parser.add_argument('--time_unit', default='h',
 						help='parameters about time, x axis time unit (default: h)')
 	parser.add_argument('--time_interval', type=float, default=1,
@@ -82,7 +82,6 @@ def main():
 	if args.time:
 		if args.xlabel is None:
 			args.xlabel = 'Training time'
-		args.xkey = 't'
 		if args.time_unit == 'h': 
 			xscale = 60 * 60
 			args.time_interval = 2
@@ -96,10 +95,23 @@ def main():
 	if args.ylabel is None:
 		args.ylabel = 'Episode Reward'
 
-	if args.filename != 'monitor':
+	if '.' not in args.filename:
+		args.filename = args.filename + '.csv'
+	
+	# OpenAI Baseline's monitor
+	if args.filename == 'monitor.csv':
+		args.xkey = 'l'
+		args.ykey = ['r']
+	
+	# OpenAI spinup's progress
+	if args.filename == 'progress.txt' or args.filename == 'progress.csv':
+		args.xkey = 'TotalEnvInteracts'
+		args.ykey = ['AverageEpRet']
+	
+	# rl-plotter's evaluator
+	if args.filename == 'evaluator.csv':
 		args.xkey = 'total_steps'
-		if args.ykey == ['r']:
-			args.ykey = ['mean_score']
+		args.ykey = ['mean_score']
 
 	allresults = pu.load_results(args.log_dir, filename=args.filename, filters=args.filters)
 	pu.plot_results(allresults,

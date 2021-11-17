@@ -4,59 +4,59 @@
 
 [README](README.md) | [中文文档](README_zh.md)
 
-This is a simple tool which can plot learning curves easily for reinforcement learning (RL)
+`rl-plotter`是一个可以轻松绘制强化学习算法训练曲线或其它变量的小工具
 
-## Installation
+## 安装
 
-from PIP
+通过pip安装：
 
 ```
 pip install rl_plotter
 ```
 
-from source
+从源安装：
 
 ```
 python setup.py install
 ```
 
-## Usage
+## 用法
 
-**1. add basic logger**
+**1. 添加基本记录工具**
 
-Add our logger in your code of evaluation (Recommend)
+将我们的记录工具添加到强化学习算法的评估部分 (推荐)
 
 ```python
 from rl_plotter.logger import Logger
 logger = Logger(exp_name="your_exp_name", env_name, seed)
 ····
-logger.update(score=evaluation_score_list, total_steps=current_training_steps)
+logger.update(score=评估得分(list), total_steps=当前训练步数)
 ```
 
-or you can use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (Support)
+或者使用 [OpenAI-spinningup](https://github.com/openai/spinningup) 内置的记录工具
+
+也可以使用 [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (不推荐)
 
 ```python
 env = logger.monitor_env(env)
 ```
 
-or just use [OpenAI-spinningup](https://github.com/openai/spinningup) to log (Support)
+**2. 记录其它变量(可选)**
 
-**2. track other variables (Optional)**
-
-if you want to track other variables, you can use our custom_logger:
+如果你需要记录其它变量，你可以使用自定义logger：
 
 ```python
-custom_logger=logger.new_custom_logger(filename, fieldnames=["variable 1", "variable 2", ..., "variable n"])
-custom_logger.update(fieldvalues=variable_value_list, total_steps=current_training_steps)
+custom_logger=logger.new_custom_logger(filename, fieldnames=["变量 1", "变量 2", ..., "变量 n"])
+custom_logger.update(fieldvalues=变量值(list), total_steps=当前训练步数)
 ```
 
-**3. plot the results**
+**3. 绘制结果**
 
-After the training or when you are training your agent, you can plot the learning curves in this way:
+在进行训练的过程中或者训练结束后，你都可以使用下面的方式轻松绘制训练曲线：
 
-- switch to log directory or multi log’s parent directory (default: ./)
+- 切换到log目录或多个log的上级目录（默认为当前目录）
 
-- run command to plot:
+- 运行绘制命令：
 
 ```
 rl_plotter --save --show
@@ -64,7 +64,7 @@ rl_plotter --save --show
 
 ## Example
 
-**1. commonly used commands**
+**1. 常用命令**
 
 ```
 rl_plotter --save --show --filter HalfCheetah
@@ -73,7 +73,7 @@ rl_plotter --save --show --filter Swimmer --avg_group --shaded_std --shaded_err
 rl_plotter --save --show --filter Walker2d --filename progress.txt --xkey TotalEnvInteracts --ykey AverageEpRet
 ```
 
-**2. practical examples**
+**2. 实用例子**
 
 ```
 rl_plotter --show --save --avg_group --shaded_err --shaded_std
@@ -87,9 +87,9 @@ rl_plotter --show --save --avg_group --shaded_err --shaded_std --filename q --fi
 
 
 
-**3. more specific usage**
+**3. 更具体的用法**
 
-you can find all parameters which can custom the style of your curves using `help`
+你可以使用`help`命令查看所有可以调整与自定义的参数
 
 ```
 rl_plotter --help
@@ -141,18 +141,18 @@ optional arguments:
 --dpi                 figure dpi (default: 400)
 ```
 
-## Features
+## 特性
 
-- [x] custom logger, style, key, label, x-axis formatter, and so on ...
-- [x] filter of directory name
-- [x] multi-experiment plotter
-- [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor and [OpenAI-spinningup](https://github.com/openai/spinningup)
-- [x] corresponding color for specific experiment
-- [x] multi y key & duel y legend
+- [x] 自定义记录，绘图样式，坐标轴，x轴数据格式等...
+- [x] 根据目录与文件名筛选绘图数据
+- [x] 多个实验绘制在同一张图中，并自动分组
+- [x] 兼容 [OpenAI-baseline](https://github.com/openai/baselines) 和[OpenAI-spinningup](https://github.com/openai/spinningup)记录的数据，可以直接绘制曲线
+- [x] 可以为每个实验可以设置对应的颜色
+- [x] 绘制自定义数据，支持双y轴绘制
 
 ## Citing the Project
 
-If using this repository for your research or publication, please cite:
+如果您使用本工具用于您的研究工作，请在相关的论文或出版物中按下方的格式引用：
 
 ```
 @misc{rl-plotter,

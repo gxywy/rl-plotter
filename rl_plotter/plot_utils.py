@@ -12,6 +12,29 @@ import numpy as np
 import pandas
 from glob import glob
 
+COLORS = ([
+	# deepmind style
+	'#0072B2',
+	'#009E73',
+	'#D55E00',
+	'#CC79A7',
+	'#F0E442',
+	# built-in color
+	'blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'purple', 'pink',
+	'brown', 'orange', 'teal',  'lightblue', 'lime', 'lavender', 'turquoise',
+	'darkgreen', 'tan', 'salmon', 'gold',  'darkred', 'darkblue',
+	# personal color
+	'#313695',  # DARK BLUE
+	'#74add1',  # LIGHT BLUE
+	'#4daf4a',  # GREEN
+	'#f46d43',  # ORANGE
+	'#d73027',  # RED
+	'#984ea3',  # PURPLE
+	'#f781bf',  # PINK
+	'#ffc832',  # YELLOW
+	'#000000',  # BLACK
+])
+
 def one_sided_ema(xolds, yolds, low=None, high=None, n=512, decay_steps=1., low_counts_threshold=1e-8):
 	'''
 	perform one-sided (causal) EMA (exponential moving average)
@@ -106,39 +129,40 @@ def symmetric_ema(xolds, yolds, low=None, high=None, n=512, decay_steps=1., low_
 	ys[count_ys < low_counts_threshold] = np.nan
 	return xs, ys, count_ys
 
-def load_csv_results(dir, filename="monitor"):
+def load_csv_results(dir, filename="monitor.csv"):
 	import pandas
 	monitor_files = (
-		glob(osp.join(dir, f"*{filename}.csv"))) # get both csv
+		glob(osp.join(dir, f"*{filename}")))
 	if not monitor_files:
-		print("no monitor files of the form found in " + dir)
+		print("no files of the form found in " + dir)
 	dfs = []
 	headers = []
 	for fname in monitor_files:
 		with open(fname, 'rt') as fh:
-			if fname.endswith('csv'):
-				firstline = fh.readline()
-				if not firstline:
-					continue
+			firstline = fh.readline()
+			if not firstline:
+				continue
+			if filename == 'monitor.csv' or firstline[0] == '#':
 				assert firstline[0] == '#'
 				header = json.loads(firstline[1:])
-				df = pandas.read_csv(fh, index_col=None)
 				headers.append(header)
+				df = pandas.read_csv(fh, index_col=None, sep=",|\t", engine='python')
 			else:
-				assert 0, 'unreachable'
-			if filename=="monitor":
+				fh.seek(0)
+				df = pandas.read_csv(fh, index_col=None, sep=",|\t", engine='python')
+			if filename=="monitor.csv":
 				df['t'] += header['t_start']
 		dfs.append(df)
 	df = pandas.concat(dfs)
-	if filename=="monitor":
+	if filename=="monitor.csv":
 		df.sort_values('t', inplace=True)
 	df.reset_index(inplace=True)
-	if filename=="monitor":
+	if filename=="monitor.csv":
 		df['t'] -= min(header['t_start'] for header in headers)
 	#df.headers = headers # HACK to preserve backwards compatibility
 	return df
 
-def load_results(root_dir_or_dirs="./", filename="monitor", filters=[]):
+def load_results(root_dir_or_dirs="./", filename="monitor.csv", filters=[]):
 
 	if isinstance(root_dir_or_dirs, str):
 		rootdirs = [osp.expanduser(root_dir_or_dirs)]
@@ -153,9 +177,11 @@ def load_results(root_dir_or_dirs="./", filename="monitor", filters=[]):
 				if filter in dirname:
 					result = {'dirname' : dirname, "data": None}
 
-					file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename + r'\.csv')
+					file_re = re.compile(r'(\d+\.)?(\d+\.)?' + filename)
 					if any([f for f in files if file_re.match(f)]):
-						result['data'] = pandas.DataFrame(load_csv_results(dirname, filename))
+						csv_result = load_csv_results(dirname, filename)
+						if csv_result is not None:
+							result['data'] = pandas.DataFrame(csv_result)
 
 					if result['data'] is not None:
 						allresults.append(result)
@@ -186,30 +212,6 @@ def smooth(y, radius, mode='two_sided', valid_only=False):
 		if valid_only:
 			out[:radius] = np.nan
 	return out
-
-
-COLORS = ([
-	# deepmind style
-	'#0072B2',
-	'#009E73',
-	'#D55E00',
-	'#CC79A7',
-	'#F0E442',
-	# built-in color
-	'blue', 'green', 'red', 'cyan', 'magenta', 'yellow', 'black', 'purple', 'pink',
-	'brown', 'orange', 'teal',  'lightblue', 'lime', 'lavender', 'turquoise',
-	'darkgreen', 'tan', 'salmon', 'gold',  'darkred', 'darkblue',
-	# personal color
-	'#313695',  # DARK BLUE
-	'#74add1',  # LIGHT BLUE
-	'#4daf4a',  # GREEN
-	'#f46d43',  # ORANGE
-	'#d73027',  # RED
-	'#984ea3',  # PURPLE
-	'#f781bf',  # PINK
-	'#ffc832',  # YELLOW
-	'#000000',  # BLACK
-])
 
 def default_split_fn(r):
 	# match name between slash and -<digits> at the end of the string
@@ -242,7 +244,7 @@ def plot_results(
 	legend_group_num=True,
 	legend_borderpad=1.0,
 	legend_labelspacing=1.0,
-	filename="monitor"
+	filename="monitor.csv"
 ):
 	default_samples = 512
 	if average_group:
@@ -272,7 +274,7 @@ def plot_results(
 
 	for result in allresults:
 		group_raw = group_fn(result)
-
+	
 		for key in ykey: # handle n-ykey
 			if len(ykey) > 1:
 				group = group_raw + "_" + key
@@ -290,9 +292,9 @@ def plot_results(
 			current_group = groups_results[group]
 			current_group['num'] += 1
 			
-			if filename == 'monitor' and xkey == 'l' :
+			if filename == 'monitor.csv' and xkey == 'l' :
 				x, y = np.cumsum(result['data'][xkey]), smooth(result['data'][key], radius=smooth_radius)
-			elif filename == 'monitor' and xkey == 't':
+			elif filename == 'monitor.csv' and xkey == 't':
 				x, y = result['data'][xkey] / xscale, smooth(result['data'][key], radius=smooth_radius)
 			else:
 				x, y = result['data'][xkey], smooth(result['data'][key], radius=smooth_radius)
@@ -379,7 +381,7 @@ def plot_results(
 
 
 if __name__ == "__main__":
-	allresults = load_results("./logs", filename="evaluator")
+	allresults = load_results("./logs", filename="evaluator.csv")
 	for result in allresults:
 		print(result["dirname"])
 	plot_results(allresults, average_group=False, smooth_radius=0)
