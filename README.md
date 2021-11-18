@@ -33,13 +33,13 @@ logger = Logger(exp_name="your_exp_name", env_name, seed)
 logger.update(score=evaluation_score_list, total_steps=current_training_steps)
 ```
 
-or you can use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (Support)
+or just use [OpenAI-spinningup](https://github.com/openai/spinningup) to log (Support)
+
+or you can use [OpenAI-baseline](https://github.com/openai/baselines) bench.Monitor (Not Recommend)
 
 ```python
 env = logger.monitor_env(env)
 ```
-
-or just use [OpenAI-spinningup](https://github.com/openai/spinningup) to log (Support)
 
 **2. track other variables (Optional)**
 
