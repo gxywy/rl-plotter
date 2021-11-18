@@ -28,7 +28,7 @@ Add our logger in your code of evaluation (Recommend)
 
 ```python
 from rl_plotter.logger import Logger
-logger = Logger(exp_name="your_exp_name", env_name, seed)
+logger = Logger(exp_name="your_exp_name", env_name, seed, locals())
 ····
 logger.update(score=evaluation_score_list, total_steps=current_training_steps)
 ```

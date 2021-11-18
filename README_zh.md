@@ -28,7 +28,7 @@ python setup.py install
 
 ```python
 from rl_plotter.logger import Logger
-logger = Logger(exp_name="your_exp_name", env_name, seed)
+logger = Logger(exp_name="your_exp_name", env_name, seed, locals())
 ····
 logger.update(score=评估得分(list), total_steps=当前训练步数)
 ```
