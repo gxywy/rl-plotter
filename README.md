@@ -165,3 +165,7 @@ If using this repository for your research or publication, please cite:
 }
 ```
 
+## Acknowledgment
+
+The core of this tools is inspired by [baselines/plot_util.py](https://github.com/openai/baselines/blob/master/baselines/common/plot_util.py)
+
