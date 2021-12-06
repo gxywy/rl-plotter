@@ -98,7 +98,7 @@ def main():
 	if '.' not in args.filename:
 		args.filename = args.filename + '.csv'
 	
-	# OpenAI Baseline's monitor
+	# OpenAI baseline's monitor
 	if args.filename == 'monitor.csv':
 		args.xkey = 'l'
 		args.ykey = ['r']
@@ -106,12 +106,15 @@ def main():
 	# OpenAI spinup's progress
 	if args.filename == 'progress.txt' or args.filename == 'progress.csv':
 		args.xkey = 'TotalEnvInteracts'
-		args.ykey = ['AverageEpRet']
+		args.ykey = ['AverageTestEpRet']
 	
 	# rl-plotter's evaluator
 	if args.filename == 'evaluator.csv':
 		args.xkey = 'total_steps'
 		args.ykey = ['mean_score']
+
+	if args.save is False:
+		args.show = True
 
 	allresults = pu.load_results(args.log_dir, filename=args.filename, filters=args.filters)
 	pu.plot_results(allresults,
