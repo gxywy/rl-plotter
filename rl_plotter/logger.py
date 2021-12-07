@@ -10,32 +10,36 @@ import numpy as np
 from rl_plotter import log_utils as lu
 
 class Logger():
-    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, config=None, filename='evaluator.csv'):
+    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, config=None, filename='evaluator.csv', debug=False):
         self.exp_name = exp_name
         self.env_name = env_name
         self.seed = seed
         self.previous_log_time = time.time()
         self.start_log_time = self.previous_log_time
+        self.debug = debug
 
-        num_exps = 0
-        self.log_dir = f"./{log_dir}/{exp_name.replace('-', '_')}_{env_name.replace('-', '_')}_seed{seed}"
-        while True:
-            if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
-                num_exps += 1
-            else:
-                self.log_dir += f"-{str(num_exps)}/"
-                os.makedirs(self.log_dir)
-                break
-        self.csv_file = open(self.log_dir + '/' + filename, 'w', encoding='utf8')
-        # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
-        # header = '# {} \n'.format(json.dumps(header))
-        # self.csv_file.write(header)
-        self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
-        self.logger.writeheader()
-        self.csv_file.flush()
+        if debug:
+            print(lu.colorize(f"\nDebug mode is activate !!!\nLog will NOT be saved !!!\n", 'red', bold=True))
+        else:
+            num_exps = 0
+            self.log_dir = f"./{log_dir}/{exp_name.replace('-', '_')}_{env_name.replace('-', '_')}_seed{seed}"
+            while True:
+                if os.path.exists(f"{self.log_dir}-{str(num_exps)}/"):
+                    num_exps += 1
+                else:
+                    self.log_dir += f"-{str(num_exps)}/"
+                    os.makedirs(self.log_dir)
+                    break
+            self.csv_file = open(self.log_dir + '/' + filename, 'w', encoding='utf8')
+            # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
+            # header = '# {} \n'.format(json.dumps(header))
+            # self.csv_file.write(header)
+            self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
+            self.logger.writeheader()
+            self.csv_file.flush()
 
-        if config != None:
-            lu.save_config(exp_name, config, self.log_dir)
+            if config != None:
+                lu.save_config(exp_name, config, self.log_dir)
 
     def monitor_env(self, env):
         from baselines import bench
@@ -57,31 +61,34 @@ class Logger():
         print(lu.colorize(f"Avg: {avg_score:.3f} Std: {std_score:.3f} Max: {max_score:.3f} Min: {min_score:.3f}\n", 'yellow', bold=True))
         self.previous_log_time = current_log_time
         
-        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
-        self.logger.writerow(epinfo)
-        self.csv_file.flush()
+        if not self.debug:
+            epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
+            self.logger.writerow(epinfo)
+            self.csv_file.flush()
     
     def new_custom_logger(self, filename=None, fieldnames=[]):
-        custom_logger = CustomLogger(self.log_dir, self.exp_name, self.env_name, self.seed, filename, fieldnames)
+        custom_logger = CustomLogger(self.log_dir, self.exp_name, self.env_name, self.seed, filename, fieldnames, self.debug)
         return custom_logger
     
     def new_eval_logger(self, filename=None):
-        eval_logger = EvalLogger(self.log_dir, self.exp_name, self.env_name, self.seed, filename)
+        eval_logger = EvalLogger(self.log_dir, self.exp_name, self.env_name, self.seed, filename, self.debug)
         return eval_logger
 
 class CustomLogger():
-    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv", fieldnames=[]):
+    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv", fieldnames=[], debug=False):
         self.previous_log_time = time.time()
         self.start_log_time = self.previous_log_time
+        self.debug = debug
 
-        self.fieldnames = ["total_steps"] + fieldnames
-        self.csv_file = open(log_dir + '/' + filename, 'w', encoding='utf8')
-        # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
-        # header = '# {} \n'.format(json.dumps(header))
-        # self.csv_file.write(header)
-        self.logger = csv.DictWriter(self.csv_file, fieldnames=(self.fieldnames))
-        self.logger.writeheader()
-        self.csv_file.flush()
+        if not self.debug:
+            self.fieldnames = ["total_steps"] + fieldnames
+            self.csv_file = open(log_dir + '/' + filename, 'w', encoding='utf8')
+            # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
+            # header = '# {} \n'.format(json.dumps(header))
+            # self.csv_file.write(header)
+            self.logger = csv.DictWriter(self.csv_file, fieldnames=(self.fieldnames))
+            self.logger.writeheader()
+            self.csv_file.flush()
 
     def update(self, fieldvalues, total_steps):
         epinfo = {}
@@ -93,23 +100,26 @@ class CustomLogger():
         print(lu.colorize(f"fieldvalues: {fieldvalues}\n", 'blue', bold=True))
         self.previous_log_time = current_log_time
        
-        for filedname, filedvalue in zip(self.fieldnames, fieldvalues):
-            epinfo.update({filedname: filedvalue})
-        self.logger.writerow(epinfo)
-        self.csv_file.flush()
+        if not self.debug:
+            for filedname, filedvalue in zip(self.fieldnames, fieldvalues):
+                epinfo.update({filedname: filedvalue})
+            self.logger.writerow(epinfo)
+            self.csv_file.flush()
 
 class EvalLogger():
-    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv"):
+    def __init__(self, log_dir="./logs", exp_name=None, env_name=None, seed=0, filename="logger.csv", debug=False):
         self.previous_log_time = time.time()
         self.start_log_time = self.previous_log_time
+        self.debug = debug
 
-        self.csv_file = open(log_dir + '/' + filename, 'w', encoding='utf8')
-        # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
-        # header = '# {} \n'.format(json.dumps(header))
-        # self.csv_file.write(header)
-        self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
-        self.logger.writeheader()
-        self.csv_file.flush()
+        if not self.debug:
+            self.csv_file = open(log_dir + '/' + filename, 'w', encoding='utf8')
+            # header={"t_start": time.time(), 'env_id' : env_name, 'exp_name': exp_name, 'seed': seed}
+            # header = '# {} \n'.format(json.dumps(header))
+            # self.csv_file.write(header)
+            self.logger = csv.DictWriter(self.csv_file, fieldnames=('mean_score', 'total_steps', 'std_score', 'max_score', 'min_score'))
+            self.logger.writeheader()
+            self.csv_file.flush()
 
     def update(self, score, total_steps):
         '''
@@ -126,13 +136,14 @@ class EvalLogger():
         print(lu.colorize(f"Avg: {avg_score:.3f} Std: {std_score:.3f} Max: {max_score:.3f} Min: {min_score:.3f}\n", 'yellow', bold=True))
         self.previous_log_time = current_log_time
         
-        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
-        self.logger.writerow(epinfo)
-        self.csv_file.flush()
+        if not self.debug:
+            epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
+            self.logger.writerow(epinfo)
+            self.csv_file.flush()
     
     def update(self, avg_score, std_score, max_score, min_score, total_steps):
-        
-        epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
-        self.logger.writerow(epinfo)
-        self.csv_file.flush()
+        if not self.debug:
+            epinfo = {"mean_score": avg_score, "total_steps": total_steps, "std_score": std_score, "max_score": max_score, "min_score": min_score}
+            self.logger.writerow(epinfo)
+            self.csv_file.flush()
     

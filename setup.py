@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='UTF-8') as fh:
 
 setuptools.setup(
     name="rl_plotter",
-    version="2.3.5",
+    version="2.3.6",
     author="Xiaoyu Gong",
     author_email="gxywy@hotmail.com",
     description="A plotter for reinforcement learning (RL)",
