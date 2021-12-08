@@ -11,8 +11,8 @@ from rl_plotter import plot_utils as pu
 
 def main():
 	parser = argparse.ArgumentParser(description='plotter')
-	parser.add_argument('--fig_length', type=int, default=8, 
-						help='matplotlib figure length (default: 8)')
+	parser.add_argument('--fig_length', type=int, default=6, 
+						help='matplotlib figure length (default: 6)')
 	parser.add_argument('--fig_width', type=int, default=6, 
 						help='matplotlib figure width (default: 6)')
 	parser.add_argument('--style', default='seaborn',
@@ -68,7 +68,7 @@ def main():
 						help='log dir (default: ./)')
 	parser.add_argument('--filters', default=[''], nargs='+',
 						help='filters of dirname')
-	parser.add_argument('--filename', default='evaluator',
+	parser.add_argument('--filename', default='evaluator.csv',
 						help='csv filename')
 	parser.add_argument('--show', action='store_true',
 						help='show figure')

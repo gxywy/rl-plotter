@@ -62,7 +62,7 @@ custom_logger.update(fieldvalues=变量值(list), total_steps=当前训练步数
 rl_plotter --save --show
 ```
 
-## Example
+## 例子
 
 **1. 常用命令**
 

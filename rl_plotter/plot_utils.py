@@ -3,6 +3,7 @@
 
 __author__ = 'MICROYU'
 
+from datetime import date
 import re
 import matplotlib.pyplot as plt
 import os.path as osp
@@ -162,7 +163,7 @@ def load_csv_results(dir, filename="monitor.csv"):
 	#df.headers = headers # HACK to preserve backwards compatibility
 	return df
 
-def load_results(root_dir_or_dirs="./", filename="monitor.csv", filters=[]):
+def load_results(root_dir_or_dirs="./", filename="monitor.csv", filters=['']):
 
 	if isinstance(root_dir_or_dirs, str):
 		rootdirs = [osp.expanduser(root_dir_or_dirs)]
@@ -368,21 +369,78 @@ def plot_results(
 			plt.legend(
 					[groups_results[key]['legend'] for key in groups_results.keys()],
 					['%s (%i)'%(key.replace('without', 'w/o').replace('_', '-'), groups_results[key]['num']) for key in groups_results.keys()] if average_group else groups_results.keys(),
-					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing,ncol= len(groups_results.keys()) if legend_outside else 1)
+					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing, ncol=len(groups_results.keys()) if legend_outside else 1)
 		else:
 			plt.legend(
 					[groups_results[key]['legend'] for key in groups_results.keys()],
 					['%s'%(key.replace('without', 'w/o').replace('_', '-')) for key in groups_results.keys()] if average_group else groups_results.keys(),
-					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing,ncol= len(groups_results.keys()) if legend_outside else 1)
+					loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing, ncol=len(groups_results.keys()) if legend_outside else 1)
 	# add title
 	plt.title(title)
 	# add xlabels
 	if xlabel is not None: plt.xlabel(xlabel)
 
 
+def plot_data(data, xaxis='total_steps', value="mean_score", condition="Condition1", smooth=1, 
+        legend_outside=False,
+        legend_loc=0,
+        legend_borderpad=1.0,
+        legend_labelspacing=1.0,
+        font_scale=1.5,
+        **kwargs):
+    import seaborn as sns
+    if smooth > 1:
+        """
+        smooth data with moving window average.
+        that is,
+            smoothed_y[t] = average(y[t-k], y[t-k+1], ..., y[t+k-1], y[t+k])
+        where the "smooth" param is width of that window (2k+1)
+        """
+        y = np.ones(smooth)
+        for datum in data:
+            x = np.asarray(datum[value])
+            z = np.ones(len(x))
+            smoothed_x = np.convolve(x,y,'same') / np.convolve(z,y,'same')
+            datum[value] = smoothed_x
+    if isinstance(data, list):
+        data = pandas.concat(data, ignore_index=True)
+    
+    data.sort_values(by='Condition1', axis=0)
+
+    sns.set(style="darkgrid", font_scale=font_scale)
+    sns.lineplot(data=data, x=xaxis, y=value, hue=condition, ci='sd', **kwargs)
+    handles, labels = plt.gca().get_legend_handles_labels()
+
+    plt.legend(
+        handles[1:],
+        ['%s'%(key.replace('without', 'w/o').replace('_', '-')) for key in labels[1:]],
+        loc=9 if legend_outside else legend_loc, bbox_to_anchor = (0.5,-0.1) if legend_outside else (1,1) if legend_outside else None, borderpad=legend_borderpad, labelspacing=legend_labelspacing, ncol=len(labels)-1 if legend_outside else 1)
+
+    xscale = np.max(np.asarray(data[xaxis])) > 5e3
+    if xscale:
+        # Just some formatting niceness: x-axis scale in scientific notation if max x is large
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+
+    plt.tight_layout(pad=0.5)
+
+
 if __name__ == "__main__":
-	allresults = load_results("./logs", filename="evaluator.csv")
-	for result in allresults:
-		print(result["dirname"])
-	plot_results(allresults, average_group=False, smooth_radius=0)
-	#plt.savefig('figure', dpi=400)
+	# allresults = load_results("./logs", filename="evaluator.csv")
+	# for result in allresults:
+	# 	print(result["dirname"])
+	# plot_results(allresults, average_group=False, smooth_radius=0)
+	# plt.show()
+
+    # allresults = load_results("./", filename="evaluator.csv")
+    # datas = []
+    # for result in allresults:
+    #     result['data'].insert(len(result['data'].columns),'Condition1', default_split_fn(result))
+    #     datas.append(result['data'])
+    # plt.figure()
+    # fig = plt.gcf()
+    # fig.set_size_inches((16, 9), forward=False)
+
+    # plot_data(data=datas)
+    # plt.show()
+    pass
+    
