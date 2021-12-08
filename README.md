@@ -62,6 +62,12 @@ After the training or when you are training your agent, you can plot the learnin
 rl_plotter --save --show
 ```
 
+You can also use seaborn kernel to get the same plot style as [OpenAI-spinningup](https://github.com/openai/spinningup):
+
+```
+rl_plotter_spinup --save --show
+```
+
 ## Example
 
 **1. commonly used commands**
@@ -146,6 +152,7 @@ optional arguments:
 - [x] custom logger, style, key, label, x-axis formatter, and so on ...
 - [x] filter of directory name
 - [x] multi-experiment plotter
+- [x] multiple plotting kernels (native matplotlib plotting or seaborn plotting)
 - [x] compatible with [OpenAI-baseline](https://github.com/openai/baselines) monitor and [OpenAI-spinningup](https://github.com/openai/spinningup)
 - [x] corresponding color for specific experiment
 - [x] multi y key & duel y legend

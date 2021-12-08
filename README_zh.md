@@ -62,6 +62,12 @@ custom_logger.update(fieldvalues=变量值(list), total_steps=当前训练步数
 rl_plotter --save --show
 ```
 
+你也可以使用seaborn内核的绘图工具，获得与[OpenAI-spinningup](https://github.com/openai/spinningup)相同的绘制效果
+
+```
+rl_plotter_spinup --save --show
+```
+
 ## 例子
 
 **1. 常用命令**
@@ -146,6 +152,7 @@ optional arguments:
 - [x] 自定义记录，绘图样式，坐标轴，x轴数据格式等...
 - [x] 根据目录与文件名筛选绘图数据
 - [x] 多个实验绘制在同一张图中，并自动分组
+- [x] 多种绘图内核(第一种为原生matplotlib绘制，第二种为seaborn绘制)
 - [x] 兼容 [OpenAI-baseline](https://github.com/openai/baselines) 和[OpenAI-spinningup](https://github.com/openai/spinningup)记录的数据，可以直接绘制曲线
 - [x] 可以为每个实验可以设置对应的颜色
 - [x] 绘制自定义数据，支持双y轴绘制
