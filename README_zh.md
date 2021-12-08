@@ -174,4 +174,4 @@ optional arguments:
 
 ## 致谢
 
-本项目的部分组件参考了[baselines/plot_util.py](https://github.com/openai/baselines/blob/master/baselines/common/plot_util.py)
+本项目的部分组件参考了[baselines/plot_util.py](https://github.com/openai/baselines/blob/master/baselines/common/plot_util.py)与[spinningup/plot.py](https://github.com/openai/spinningup/blob/master/spinup/utils/plot.py)
