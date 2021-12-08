@@ -106,12 +106,14 @@ def main():
 	# OpenAI spinup's progress
 	if args.filename == 'progress.txt' or args.filename == 'progress.csv':
 		args.xkey = 'TotalEnvInteracts'
-		args.ykey = ['AverageTestEpRet']
+		if len(args.ykey) == 1:
+			args.ykey = ['AverageTestEpRet']
 	
 	# rl-plotter's evaluator
 	if args.filename == 'evaluator.csv':
 		args.xkey = 'total_steps'
-		args.ykey = ['mean_score']
+		if len(args.ykey) == 1:
+			args.ykey = ['mean_score']
 
 	if args.save is False:
 		args.show = True

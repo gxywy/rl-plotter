@@ -71,12 +71,14 @@ def main():
 	# OpenAI spinup's progress
 	if args.filename == 'progress.txt' or args.filename == 'progress.csv':
 		args.xkey = 'TotalEnvInteracts'
-		args.ykey = ['AverageTestEpRet']
+		if len(args.ykey) == 1:
+			args.ykey = ['AverageTestEpRet']
 	
 	# rl-plotter's evaluator
 	if args.filename == 'evaluator.csv':
 		args.xkey = 'total_steps'
-		args.ykey = ['mean_score']
+		if len(args.ykey) == 1:
+			args.ykey = ['mean_score']
 
 	if args.save is False:
 		args.show = True
@@ -86,12 +88,14 @@ def main():
 	for result in allresults:
 		result['data'].insert(len(result['data'].columns),'Condition1', pu.default_split_fn(result))
 		datas.append(result['data'])
-	pu.plot_data(data=datas, xaxis=args.xkey, value=args.ykey[0], smooth=args.smooth, 
-		legend_outside=args.legend_outside,
-		legend_loc=args.legend_loc,
-		legend_borderpad=args.borderpad,
-		legend_labelspacing=args.labelspacing,
-		font_scale=args.font_scale)
+	for value in args.ykey:
+		plt.figure()
+		pu.plot_data(data=datas, xaxis=args.xkey, value=value, smooth=args.smooth, 
+			legend_outside=args.legend_outside,
+			legend_loc=args.legend_loc,
+			legend_borderpad=args.borderpad,
+			legend_labelspacing=args.labelspacing,
+			font_scale=args.font_scale)
 	plt.title(args.title)
 	plt.xlabel(args.xlabel)
 	plt.ylabel(args.ylabel)
