@@ -5,12 +5,11 @@ __author__ = 'MICROYU'
 
 import argparse
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mticker
 from rl_plotter import plot_utils as pu
 
 
 def main():
-	parser = argparse.ArgumentParser(description='rl-plotter')
+	parser = argparse.ArgumentParser(description='rl-plotter_spinup')
 	parser.add_argument('--log_dir', default='./',
 						help='log dir (default: ./)')
 	parser.add_argument('--filters', default=[''], nargs='+',
